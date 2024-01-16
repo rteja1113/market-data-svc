@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import datetime
+
 from pydantic import BaseModel, ConfigDict, model_validator
 
 
@@ -7,6 +10,7 @@ class DownloadWindow(BaseModel):
     A class that describes the download window for the price.
     start_datetime should be less than end_datetime
     """
+
     start_datetime: datetime.datetime
     end_datetime: datetime.datetime
 
@@ -17,6 +21,8 @@ class DownloadWindow(BaseModel):
 
 
 if __name__ == "__main__":
-    download_window = DownloadWindow(start_datetime=datetime.datetime(2020, 1, 1),
-                                     end_datetime=datetime.datetime(2021, 1, 1))
+    download_window = DownloadWindow(
+        start_datetime=datetime.datetime(2020, 1, 1),
+        end_datetime=datetime.datetime(2021, 1, 1),
+    )
     print(download_window)
