@@ -1,4 +1,13 @@
 # [WIP] IEX-APP
+# TODO
+- [X] Add pre-commit hooks
+- [ ] Descriptive README
+- [ ] Add tests
+- [ ] Add CI/CD
+- [ ] Add Dockerfile
+- [ ] Build DB and ORM
+- [ ] Add API
+
 
 ## Description
 This is a Python application that provides an API for Indian Energy Exchange Data. It uses web scraping techniques to gather data and pandas for data manipulation.
