@@ -13,7 +13,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from iex_app.api.models.data import BasePointInTimePriceData
 from iex_app.common.constants import BASE_MARKET_URL
 from iex_app.common.models import DownloadWindow
-from iex_app.scraping.parsing_engines import BaseParsingEngine
+from iex_app.scraping.parsing_engines import BaseHtmlParsingEngine
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -44,16 +44,17 @@ class BaseDataDownloaderBot(abc.ABC):
     def __init__(
         self,
         web_driver: RemoteWebDriver,
-        parsing_engine: BaseParsingEngine,
+        parsing_engine: BaseHtmlParsingEngine,
         price_table_num_columns: int,
     ):
         self.driver: RemoteWebDriver = web_driver
-        self.parsing_engine: BaseParsingEngine = parsing_engine
+        self.parsing_engine: BaseHtmlParsingEngine = parsing_engine
         self.price_table_num_columns = price_table_num_columns
 
     def extract_delivery_period_dropdown_from_driver(self) -> WebElement:
         """
-        Extracts the delivery period dropdown from the driver. The dropdown is the one with the text "Delivery Period"
+        Extracts the delivery period dropdown from the driver.
+        The dropdown is the one with the text "Delivery Period"
         """
         possible_dropdowns = self.driver.find_elements(
             By.CLASS_NAME,
@@ -75,7 +76,8 @@ class BaseDataDownloaderBot(abc.ABC):
 
     def set_start_date_to_page(self, start_datetime: datetime.datetime):
         """
-        Sets the start date to the page, using the given datetime. Executes javascript code to set start date to do this.
+        Sets the start date to the page, using the given datetime.
+        Executes javascript code to set start date to do this.
         """
         self._set_date_to_page(
             start_datetime,
@@ -84,7 +86,8 @@ class BaseDataDownloaderBot(abc.ABC):
 
     def set_end_date_to_page(self, end_datetime: datetime.datetime):
         """
-        Sets the end date to the page, using the given datetime. Executes javascript code to set end date to do this.
+        Sets the end date to the page, using the given datetime.
+        Executes javascript code to set end date to do this.
         """
         self._set_date_to_page(
             end_datetime,
@@ -101,7 +104,10 @@ class BaseDataDownloaderBot(abc.ABC):
 
         # use provided datetime to set the date
         formatted_date = "'" + datetime_to_set.strftime("%d/%m/%Y") + "'"
-        js_code_to_execute = f"document.getElementById('{date_input_element_id}').value={formatted_date};"
+        js_code_to_execute = (
+            f"document.getElementById('{date_input_element_id}')."
+            f"value={formatted_date};"
+        )
         script_executor = self.driver.execute_script
         script_executor(js_code_to_execute)
 
@@ -110,7 +116,8 @@ class BaseDataDownloaderBot(abc.ABC):
 
     def click_update_report_button(self):
         """
-        Clicks the update report button to render the page with new data_archived for new dates
+        Clicks the update report button to render the page
+        with new data for new dates
         """
         update_report_button = self.get_input_element_from_driver(
             "ctl00_InnerContent_btnUpdateReport",
@@ -122,7 +129,8 @@ class BaseDataDownloaderBot(abc.ABC):
         delivery_period_dropdown: WebElement,
     ) -> None:
         """
-        Selects the "Select Range" option from the delivery period dropdown and clicks it
+        Selects the "Select Range" option from the delivery
+        period dropdown and clicks it
         """
         dropdown_options = delivery_period_dropdown.find_elements(
             By.TAG_NAME,
@@ -136,7 +144,8 @@ class BaseDataDownloaderBot(abc.ABC):
 
     def table_present_in_page(self, driver: RemoteWebDriver) -> bool:
         """
-        Checks if the table is present in the page. The table is the one with DAM_TABLE_NUM_COLS columns
+        Checks if the table is present in the page.
+        The table is the one with price_table_num_columns columns
         """
         tables = driver.find_elements(By.TAG_NAME, "table")
         for table in tables:
@@ -156,7 +165,8 @@ class BaseDataDownloaderBot(abc.ABC):
         self, download_window: DownloadWindow
     ) -> list[BasePointInTimePriceData]:
         """
-        Downloads the data_archived for the date range. The data_archived is downloaded in batches of batch_size_in_days
+        Downloads the data_archived for the date range. The data
+        is downloaded in batches of batch_size_in_days
         The steps it follows are:
         1. Extract the delivery period dropdown from the driver
         2. Select the "Select Range" option from the dropdown
@@ -184,7 +194,8 @@ class BaseDataDownloaderBot(abc.ABC):
                     self._wait_for_table_to_load()
                 except TimeoutError:
                     logger.error(
-                        "Timeout error occurred while waiting for the data_archived to load. Closing driver",
+                        "Timeout error occurred while waiting for the "
+                        "data to load. Closing driver",
                     )
                     continue
 
@@ -193,14 +204,17 @@ class BaseDataDownloaderBot(abc.ABC):
                 )
                 price_data.extend(downloaded_dam_data)
                 logger.debug(
-                    f"Downloaded data_archived for datetime: {download_window.start_datetime}",
+                    f"Downloaded data_archived for datetime:"
+                    f" {download_window.start_datetime}",
                 )
                 download_window.start_datetime += datetime.timedelta(
                     days=self.DEFAULT_BATCH_SIZE_IN_DAYS,
                 )
         except Exception as e:
             logging.exception(
-                f"Error occurred while downloading data_archived for datetime {download_window.start_datetime}. Closing driver ",
+                f"Error occurred while downloading data_archived for datetime"
+                f" {download_window.start_datetime}. Closing driver ",
+                exc_info=e,
             )
         finally:
             self.driver.close()
@@ -214,7 +228,7 @@ class DAMPriceDataDownloaderBot(BaseDataDownloaderBot):
     def __init__(
         self,
         web_driver: RemoteWebDriver,
-        parsing_engine: BaseParsingEngine,
+        parsing_engine: BaseHtmlParsingEngine,
     ):
         super().__init__(web_driver, parsing_engine, self.DAM_TABLE_NUM_COLS)
         # post init
@@ -228,7 +242,7 @@ class RTMPriceDataDownloaderBot(BaseDataDownloaderBot):
     def __init__(
         self,
         web_driver: RemoteWebDriver,
-        parsing_engine: BaseParsingEngine,
+        parsing_engine: BaseHtmlParsingEngine,
     ):
         super().__init__(web_driver, parsing_engine, self.RTM_TABLE_NUM_COLS)
         # post init

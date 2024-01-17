@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import datetime
 import logging
-from typing import Union
 
 import bs4
 
@@ -17,17 +16,7 @@ from iex_app.common.constants import MARKET_TZ, NUM_TIME_STEPS_IN_HOUR
 logger = logging.getLogger(__name__)
 
 
-class BaseParsingEngine(abc.ABC):
-    @classmethod
-    @abc.abstractmethod
-    def parse_doc_to_price_data(cls, *args, **kwargs) -> list[BasePointInTimePriceData]:
-        """
-        An abstract method that takes in a doc type whether it's a html/xml/csv doctype and returns a list of price data_archived
-        """
-        pass
-
-
-class BaseHtmlParsingEngine(BaseParsingEngine, abc.ABC):
+class BaseHtmlParsingEngine(abc.ABC):
     PRICE_TABLE_NUM_COLS = 1
     PRICE_COLUMN_OFFSET = 2
 
@@ -35,8 +24,9 @@ class BaseHtmlParsingEngine(BaseParsingEngine, abc.ABC):
     @abc.abstractmethod
     def determine_column_offset_by_row_id(cls, row_id: int) -> int:
         """
-        Determines the offset of the columns in the row based on the row id. Unfortunately, every row
-        has a different number of columns, so we need to determine the offset based on the row id.
+        Determines the offset of the columns in the row based on the row id.
+        Unfortunately, every row has a different number of columns,
+        so we need to determine the offset based on the row id.
         """
         pass
 
@@ -48,8 +38,9 @@ class BaseHtmlParsingEngine(BaseParsingEngine, abc.ABC):
         row_id: int,
     ) -> tuple[datetime.datetime, list[float | None]]:
         """
-        Parses the data_archived from a row in the price table. Returns a tuple of the datetime and the energy prices for all zones
-        for that datetime.
+        Parses the data_archived from a row in the price table.
+        Returns a tuple of the datetime and the energy prices for
+        all zones for that datetime.
         """
         cells = row.find_all("td")
         column_offset = cls.determine_column_offset_by_row_id(row_id)
@@ -59,13 +50,14 @@ class BaseHtmlParsingEngine(BaseParsingEngine, abc.ABC):
                 cells[1 + column_offset],
             )
         )
-        energy_prices = []
+        energy_prices: list[float | None] = []
         for col_id in range(cls.PRICE_COLUMN_OFFSET + column_offset, len(cells)):
             cell = cells[col_id]
             try:
                 price_val = float(cell.text.strip())
             except Exception as e:
-                price_val = None
+                logger.error("Error parsing price value from cell", exc_info=e)
+                price_val = float("nan")
             energy_prices.append(price_val)
 
         return price_datetime, energy_prices
@@ -73,7 +65,8 @@ class BaseHtmlParsingEngine(BaseParsingEngine, abc.ABC):
     @staticmethod
     def parse_time_interval_from_cell(cell: bs4.element.Tag) -> datetime.timedelta:
         """
-        The cell has text in the format "HH:MM - HH:MM" where the first time is the start of the time interval and the second
+        The cell has text in the format "HH:MM - HH:MM" where the first time is
+        the start of the time interval and the second
         :param cell:
         :return:
         """
@@ -98,7 +91,8 @@ class BaseHtmlParsingEngine(BaseParsingEngine, abc.ABC):
     @classmethod
     def get_price_table_from_page(cls, page: bs4.BeautifulSoup) -> bs4.element.Tag:
         """
-        Gets the price table from the page. The price table is the table with DAM_TABLE_NUM_COLS columns
+        Gets the price table from the page. The price table is the table
+        with DAM_TABLE_NUM_COLS columns
         """
         if cls._is_price_table_present(page, cls.PRICE_TABLE_NUM_COLS):
             tables = page.find_all("table")
@@ -116,7 +110,8 @@ class BaseHtmlParsingEngine(BaseParsingEngine, abc.ABC):
         price_table: bs4.element.Tag,
     ) -> datetime.datetime:
         """
-        Gets the datetime of the start of the trading day from the price table. It can be found in row 2
+        Gets the datetime of the start of the trading day from the
+        price table. It can be found in row 2
         """
         all_rows: bs4.element.ResultSet = price_table.find_all("tr")
         row_2 = all_rows[2]
@@ -163,8 +158,9 @@ class DAMHtmlParsingEngine(BaseHtmlParsingEngine):
     @classmethod
     def determine_column_offset_by_row_id(cls, row_id: int) -> int:
         """
-        Determines the offset of the columns in the row based on the row id. Unfortunately, every row
-        has a different number of columns, so we need to determine the offset based on the row id.
+        Determines the offset of the columns in the row based on the row id.
+        Unfortunately, every row has a different number of columns, so we need
+        to determine the offset based on the row id.
         """
         if row_id == 2:
             return 2
@@ -238,8 +234,9 @@ class RTMHtmlParsingEngine(BaseHtmlParsingEngine):
     @classmethod
     def determine_column_offset_by_row_id(cls, row_id: int) -> int:
         """
-        Determines the offset of the columns in the row based on the row id. Unfortunately, every row
-        has a different number of columns, so we need to determine the offset based on the row id.
+        Determines the offset of the columns in the row based on the row id.
+        Unfortunately, every row has a different number of columns, so we need
+        to determine the offset based on the row id.
         """
         if row_id == 2:
             return 3
