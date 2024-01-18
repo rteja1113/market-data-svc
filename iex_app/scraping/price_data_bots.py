@@ -198,10 +198,10 @@ class PriceDataDownloaderBot:
                     )
                     continue
 
-                downloaded_dam_data = self.parsing_engine.parse_doc_to_price_data(
+                downloaded_price_data = self.parsing_engine.parse_doc_to_price_data(
                     self.driver.page_source,
                 )
-                price_data.extend(downloaded_dam_data)
+                price_data.extend(downloaded_price_data)
                 logger.debug(
                     f"Downloaded data_archived for datetime:"
                     f" {download_window.start_datetime}",
