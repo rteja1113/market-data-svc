@@ -12,10 +12,6 @@
 ## Description
 This is a Python application that provides an API for Indian Energy Exchange Data. It uses web scraping techniques to gather data and pandas for data manipulation.
 
-## Dependencies
-- BeautifulSoup4
-- pandas
-- pre-commit
 
 ## Pre-commit Hooks
 This project uses pre-commit hooks to ensure code quality and consistency. The hooks include:
