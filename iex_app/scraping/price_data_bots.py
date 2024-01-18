@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import abc
 import datetime
 import logging
-import os
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
@@ -11,9 +9,9 @@ from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
 
 from iex_app.api.models.data import BasePointInTimePriceData
-from iex_app.common.constants import BASE_MARKET_URL
 from iex_app.common.models import DownloadWindow
 from iex_app.scraping.parsing_engines import BaseHtmlParsingEngine
+from iex_app.scraping.price_page_properties import BasePricePageProperties
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -34,7 +32,7 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 
-class BaseDataDownloaderBot(abc.ABC):
+class DataDownloaderBot:
     """
     A base class for the data_archived downloader bot
     """
@@ -45,11 +43,12 @@ class BaseDataDownloaderBot(abc.ABC):
         self,
         web_driver: RemoteWebDriver,
         parsing_engine: BaseHtmlParsingEngine,
-        price_table_num_columns: int,
+        page_properties: BasePricePageProperties,
     ):
         self.driver: RemoteWebDriver = web_driver
         self.parsing_engine: BaseHtmlParsingEngine = parsing_engine
-        self.price_table_num_columns = price_table_num_columns
+        self.price_table_num_columns = page_properties.NUM_COLS_IN_PRICE_TABLE
+        self.driver.get(page_properties.PAGE_URL)
 
     def extract_delivery_period_dropdown_from_driver(self) -> WebElement:
         """
@@ -219,31 +218,3 @@ class BaseDataDownloaderBot(abc.ABC):
         finally:
             self.driver.close()
         return price_data
-
-
-class DAMPriceDataDownloaderBot(BaseDataDownloaderBot):
-    DAM_MARKET_PRICE_URL = os.path.join(BASE_MARKET_URL, "areaprice.aspx")
-    DAM_TABLE_NUM_COLS = 18
-
-    def __init__(
-        self,
-        web_driver: RemoteWebDriver,
-        parsing_engine: BaseHtmlParsingEngine,
-    ):
-        super().__init__(web_driver, parsing_engine, self.DAM_TABLE_NUM_COLS)
-        # post init
-        self.driver.get(self.DAM_MARKET_PRICE_URL)
-
-
-class RTMPriceDataDownloaderBot(BaseDataDownloaderBot):
-    RTM_MARKET_PRICE_URL = os.path.join(BASE_MARKET_URL, "rtm_areaprice.aspx")
-    RTM_TABLE_NUM_COLS = 19
-
-    def __init__(
-        self,
-        web_driver: RemoteWebDriver,
-        parsing_engine: BaseHtmlParsingEngine,
-    ):
-        super().__init__(web_driver, parsing_engine, self.RTM_TABLE_NUM_COLS)
-        # post init
-        self.driver.get(self.RTM_MARKET_PRICE_URL)
