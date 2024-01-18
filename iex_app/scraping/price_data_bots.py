@@ -32,9 +32,9 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 
-class DataDownloaderBot:
+class PriceDataDownloaderBot:
     """
-    A base class for the data_archived downloader bot
+    A Bot for downloading price data from the IEX website.
     """
 
     DEFAULT_BATCH_SIZE_IN_DAYS = 1
