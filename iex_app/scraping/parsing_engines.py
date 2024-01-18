@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 class BaseHtmlParsingEngine(abc.ABC):
     PRICE_TABLE_NUM_COLS = 1
     PRICE_COLUMN_OFFSET = 2
+    DATA_ROW_OFFSET = 2
 
     @classmethod
     @abc.abstractmethod
@@ -31,7 +32,21 @@ class BaseHtmlParsingEngine(abc.ABC):
         pass
 
     @classmethod
-    def parse_row(
+    @abc.abstractmethod
+    def parse_row_data(
+        cls,
+        row: bs4.element.Tag,
+        trading_day_beginning_datetime: datetime.datetime,
+        row_id: int,
+    ) -> BasePointInTimePriceData:
+        """
+        Parses the price table row and returns a BasePointInTimePriceData object.
+        Inheritors should probably use _parse_row to do the actual parsing
+        """
+        pass
+
+    @classmethod
+    def _parse_row(
         cls,
         row: bs4.element.Tag,
         trading_day_beginning_datetime: datetime.datetime,
@@ -124,13 +139,32 @@ class BaseHtmlParsingEngine(abc.ABC):
         return day_beginning_datetime
 
     @classmethod
-    @abc.abstractmethod
     def parse_all_rows_from_price_table(
         cls,
         price_table: bs4.element.Tag,
         trading_day_beginning_datetime: datetime.datetime,
     ) -> list[BasePointInTimePriceData]:
-        pass
+        """
+        Parses all rows from the price table and returns a list of
+        BasePointInTimePriceData objects
+        """
+
+        # initialize data_archived structures
+        price_data: list[BasePointInTimePriceData] = []
+
+        # get all rows
+        rows: bs4.element.ResultSet = price_table.find_all("tr")
+        num_rows = len(rows)
+
+        # parse rows
+        for row_id in range(cls.DATA_ROW_OFFSET, num_rows):
+            curr_pit_data = cls.parse_row_data(
+                rows[row_id],
+                trading_day_beginning_datetime,
+                row_id,
+            )
+            price_data.append(curr_pit_data)
+        return price_data
 
     @classmethod
     def parse_doc_to_price_data(
@@ -176,7 +210,7 @@ class DAMHtmlParsingEngine(BaseHtmlParsingEngine):
         trading_day_beginning_datetime: datetime.datetime,
         row_id: int,
     ) -> DAMPointInTimePriceData:
-        price_datetime, energy_prices = cls.parse_row(
+        price_datetime, energy_prices = cls._parse_row(
             row,
             trading_day_beginning_datetime,
             row_id,
@@ -198,32 +232,6 @@ class DAMHtmlParsingEngine(BaseHtmlParsingEngine):
             w3_price_in_rs_per_mwh=energy_prices[12],
             mcp_price_in_rs_per_mwh=energy_prices[13],
         )
-
-    @classmethod
-    def parse_all_rows_from_price_table(
-        cls,
-        price_table: bs4.element.Tag,
-        trading_day_beginning_datetime: datetime.datetime,
-    ) -> list[DAMPointInTimePriceData]:
-        """
-        Parses all rows from the price table and returns a DAMPriceData object
-        """
-        # initialize data_archived structures
-        dam_price_data: list[DAMPointInTimePriceData] = []
-
-        # get all rows
-        rows: bs4.element.ResultSet = price_table.find_all("tr")
-        num_rows = len(rows)
-
-        # parse rows
-        for row_id in range(cls.DATA_ROW_OFFSET, num_rows):
-            curr_dam_pit_data = cls.parse_row_data(
-                rows[row_id],
-                trading_day_beginning_datetime,
-                row_id,
-            )
-            dam_price_data.append(curr_dam_pit_data)
-        return dam_price_data
 
 
 class RTMHtmlParsingEngine(BaseHtmlParsingEngine):
@@ -252,7 +260,7 @@ class RTMHtmlParsingEngine(BaseHtmlParsingEngine):
         trading_day_beginning_datetime: datetime.datetime,
         row_id: int,
     ) -> RTMPointInTimePriceData:
-        price_datetime, energy_prices = cls.parse_row(
+        price_datetime, energy_prices = cls._parse_row(
             row,
             trading_day_beginning_datetime,
             row_id,
@@ -274,29 +282,3 @@ class RTMHtmlParsingEngine(BaseHtmlParsingEngine):
             w3_price_in_rs_per_mwh=energy_prices[12],
             mcp_price_in_rs_per_mwh=energy_prices[13],
         )
-
-    @classmethod
-    def parse_all_rows_from_price_table(
-        cls,
-        price_table: bs4.element.Tag,
-        trading_day_beginning_datetime: datetime.datetime,
-    ) -> list[RTMPointInTimePriceData]:
-        """
-        Parses all rows from the price table and returns a DAMPriceData object
-        """
-        # initialize data_archived structures
-        rtm_price_data: list[RTMPointInTimePriceData] = []
-
-        # get all rows
-        rows: bs4.element.ResultSet = price_table.find_all("tr")
-        num_rows = len(rows)
-
-        # parse rows
-        for row_id in range(cls.DATA_ROW_OFFSET, num_rows):
-            curr_rtm_pit_data = cls.parse_row_data(
-                rows[row_id],
-                trading_day_beginning_datetime,
-                row_id,
-            )
-            rtm_price_data.append(curr_rtm_pit_data)
-        return rtm_price_data
