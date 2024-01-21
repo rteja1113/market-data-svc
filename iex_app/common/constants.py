@@ -5,7 +5,7 @@ from datetime import timedelta
 import pytz
 
 # general constants
-BASE_MARKET_URL = "https://www.iexindia.com/marketdata"
+BASE_MARKET_URL = "https://www.iexindia.com/marketdata/"
 STATE_ZONES = [
     "A1",
     "A2",
