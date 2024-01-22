@@ -35,7 +35,7 @@ jobs:
           ${{ runner.os }}-poetry-
 
     - name: Install dependencies
-      run: poetry install
+      run: poetry install --dev
 
     - name: Run tests
       run: python -m pytest
