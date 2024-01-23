@@ -16,12 +16,12 @@ def html_content(request):
         (
             DAMHtmlParsingEngine(),
             DAMPointInTimePriceData,
-            "./data/dam_prices_page.html",
+            "./tests/data/dam_prices_page.html",
         ),
         (
             RTMHtmlParsingEngine(),
             RTMPointInTimePriceData,
-            "./data/rtm_prices_page.html",
+            "./tests/data/rtm_prices_page.html",
         ),
     ],
     indirect=["html_content"],
