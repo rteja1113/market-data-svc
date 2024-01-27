@@ -8,7 +8,7 @@ from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
 
-from iex_app.api.models.data import BasePointInTimePriceData
+from iex_app.api.models.pydantic_models import BasePointInTimePriceData
 from iex_app.common.models import DownloadWindow
 from iex_app.scraping.parsing_engines import BaseHtmlParsingEngine
 from iex_app.scraping.price_page_properties import BasePricePageProperties

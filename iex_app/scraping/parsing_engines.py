@@ -6,7 +6,7 @@ import logging
 
 import bs4
 
-from iex_app.api.models.data import (
+from iex_app.api.models.pydantic_models import (
     BasePointInTimePriceData,
     DAMPointInTimePriceData,
     RTMPointInTimePriceData,
