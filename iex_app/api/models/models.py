@@ -7,7 +7,7 @@ class BasePointInTimePriceDataDb(Base):
     __abstract__ = True
 
     id = Column(Integer, primary_key=True)
-    settlement_period_start_datetime = Column(DateTime(timezone=True))
+    settlement_period_start_datetime = Column(DateTime(timezone=True), unique=True)
     a1_price_in_rs_per_mwh = Column(Float)
     a2_price_in_rs_per_mwh = Column(Float)
     e1_price_in_rs_per_mwh = Column(Float)
