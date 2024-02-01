@@ -1,43 +1,60 @@
+import logging
+
+import sqlalchemy
+
 from iex_app.api.models.models import (
+    BasePointInTimePriceDataDb,
     DAMPointInTimePriceDataDb,
     RTMPointInTimePriceDataDb,
 )
 from iex_app.api.models.pydantic_models import (
+    BasePointInTimePriceData,
     DAMPointInTimePriceData,
     RTMPointInTimePriceData,
 )
 from iex_app.db.core import Session
 
+logger = logging.getLogger(__name__)
 
-def create_dam_record(
+
+def _create_record_if_doesnot_exist(
+    db_session: Session,
+    pit_data: BasePointInTimePriceData,
+    db_price_model: sqlalchemy.orm.decl_api.DeclarativeMeta,
+) -> BasePointInTimePriceDataDb:
+    existing_record = (
+        db_session.query(db_price_model)
+        .filter(
+            db_price_model.settlement_period_start_datetime
+            == pit_data.settlement_period_start_datetime
+        )
+        .first()
+    )
+
+    if existing_record is not None:
+        logger.info(
+            f"Record already exists for {pit_data.settlement_period_start_datetime}"
+        )
+        return existing_record
+
+    pit_record = db_price_model(**pit_data.model_dump())
+    db_session.add(pit_record)
+    db_session.commit()
+    db_session.refresh(pit_record)
+    return pit_record
+
+
+def create_dam_record_if_doesnot_exist(
     db_session: Session, dam_pit_data: DAMPointInTimePriceData
 ) -> DAMPointInTimePriceDataDb:
-    """
-    Create a record in the database for the DAM price
-    :param db_session: The database session
-    :param dam_pit_data: The DAM price pydantic model instance
-    :return: None
-    """
-
-    dam_record = DAMPointInTimePriceDataDb(**dam_pit_data.model_dump())
-    db_session.add(dam_record)
-    db_session.commit()
-    db_session.refresh(dam_pit_data)
-    return dam_record
+    return _create_record_if_doesnot_exist(
+        db_session, dam_pit_data, DAMPointInTimePriceDataDb
+    )
 
 
-def create_rtm_record(
+def create_rtm_record_if_doesnot_exist(
     db_session: Session, rtm_pit_data: RTMPointInTimePriceData
 ) -> RTMPointInTimePriceDataDb:
-    """
-    Create a record in the database for the RTM price
-    :param db_session: The database session
-    :param rtm_pit_data: The RTM price pydantic model instance
-    :return: None
-    """
-
-    rtm_record = RTMPointInTimePriceDataDb(**rtm_pit_data.model_dump())
-    db_session.add(rtm_record)
-    db_session.commit()
-    db_session.refresh(rtm_pit_data)
-    return rtm_record
+    return _create_record_if_doesnot_exist(
+        db_session, rtm_pit_data, RTMPointInTimePriceDataDb
+    )
