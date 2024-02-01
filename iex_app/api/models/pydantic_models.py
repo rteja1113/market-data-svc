@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_serializer
 
 
 class BasePointInTimePriceData(BaseModel, abc.ABC):
@@ -29,6 +29,10 @@ class BasePointInTimePriceData(BaseModel, abc.ABC):
     w2_price_in_rs_per_mwh: float | None = None
     w3_price_in_rs_per_mwh: float | None = None
     mcp_price_in_rs_per_mwh: float | None = None
+
+    @field_serializer("settlement_period_start_datetime")
+    def serialize_settlement_period_start_datetime(self, value):
+        return value.isoformat()
 
 
 class DAMPointInTimePriceData(BasePointInTimePriceData):
