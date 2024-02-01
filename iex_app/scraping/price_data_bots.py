@@ -45,17 +45,17 @@ class PriceDataDownloaderBot:
         parsing_engine: BaseHtmlParsingEngine,
         page_properties: BasePricePageProperties,
     ):
-        self.driver: RemoteWebDriver = web_driver
-        self.parsing_engine: BaseHtmlParsingEngine = parsing_engine
-        self.price_table_num_columns = page_properties.NUM_COLS_IN_PRICE_TABLE
-        self.driver.get(page_properties.PAGE_URL)
+        self._driver: RemoteWebDriver = web_driver
+        self._parsing_engine: BaseHtmlParsingEngine = parsing_engine
+        self._price_table_num_columns = page_properties.NUM_COLS_IN_PRICE_TABLE
+        self._driver.get(page_properties.PAGE_URL)
 
-    def extract_delivery_period_dropdown_from_driver(self) -> WebElement:
+    def _extract_delivery_period_dropdown_from_driver(self) -> WebElement:
         """
-        Extracts the delivery period dropdown from the driver.
+        Extracts the delivery period dropdown from the _driver.
         The dropdown is the one with the text "Delivery Period"
         """
-        possible_dropdowns = self.driver.find_elements(
+        possible_dropdowns = self._driver.find_elements(
             By.CLASS_NAME,
             "mkt_filter_lbl",
         )
@@ -66,14 +66,14 @@ class PriceDataDownloaderBot:
 
         raise ValueError("Could not find delivery period dropdown")
 
-    def render_page_with_new_dates(
+    def _render_page_with_new_dates(
         self, start_datetime: datetime.datetime, end_datetime: datetime.datetime
     ):
-        self.set_start_date_to_page(start_datetime)
-        self.set_end_date_to_page(end_datetime)
-        self.click_update_report_button()
+        self._set_start_date_to_page(start_datetime)
+        self._set_end_date_to_page(end_datetime)
+        self._click_update_report_button()
 
-    def set_start_date_to_page(self, start_datetime: datetime.datetime):
+    def _set_start_date_to_page(self, start_datetime: datetime.datetime):
         """
         Sets the start date to the page, using the given datetime.
         Executes javascript code to set start date to do this.
@@ -83,7 +83,7 @@ class PriceDataDownloaderBot:
             "ctl00_InnerContent_calFromDate_txt_Date",
         )
 
-    def set_end_date_to_page(self, end_datetime: datetime.datetime):
+    def _set_end_date_to_page(self, end_datetime: datetime.datetime):
         """
         Sets the end date to the page, using the given datetime.
         Executes javascript code to set end date to do this.
@@ -96,7 +96,7 @@ class PriceDataDownloaderBot:
     def _set_date_to_page(
         self, datetime_to_set: datetime.datetime, date_input_element_id: str
     ):
-        date_input_element = self.get_input_element_from_driver(
+        date_input_element = self._get_input_element_from_driver(
             date_input_element_id,
         )
         date_input_element.click()
@@ -107,24 +107,24 @@ class PriceDataDownloaderBot:
             f"document.getElementById('{date_input_element_id}')."
             f"value={formatted_date};"
         )
-        script_executor = self.driver.execute_script
+        script_executor = self._driver.execute_script
         script_executor(js_code_to_execute)
 
-    def get_input_element_from_driver(self, input_element_id: str) -> WebElement:
-        return self.driver.find_element(By.ID, input_element_id)
+    def _get_input_element_from_driver(self, input_element_id: str) -> WebElement:
+        return self._driver.find_element(By.ID, input_element_id)
 
-    def click_update_report_button(self):
+    def _click_update_report_button(self):
         """
         Clicks the update report button to render the page
         with new data for new dates
         """
-        update_report_button = self.get_input_element_from_driver(
+        update_report_button = self._get_input_element_from_driver(
             "ctl00_InnerContent_btnUpdateReport",
         )
         update_report_button.click()
 
     @staticmethod
-    def select_and_click_range_from_delivery_period_dropdown(
+    def _select_and_click_range_from_delivery_period_dropdown(
         delivery_period_dropdown: WebElement,
     ) -> None:
         """
@@ -141,10 +141,10 @@ class PriceDataDownloaderBot:
                 return
         raise ValueError("Could not find option to Select Range option")
 
-    def table_present_in_page(self, driver: RemoteWebDriver) -> bool:
+    def _table_present_in_page(self, driver: RemoteWebDriver) -> bool:
         """
         Checks if the table is present in the page.
-        The table is the one with price_table_num_columns columns
+        The table is the one with _price_table_num_columns columns
         """
         tables = driver.find_elements(By.TAG_NAME, "table")
         for table in tables:
@@ -152,13 +152,13 @@ class PriceDataDownloaderBot:
                 num_cols = int(table.get_attribute("cols"))
             except Exception:
                 num_cols = 0
-            if num_cols == self.price_table_num_columns:
+            if num_cols == self._price_table_num_columns:
                 return True
         return False
 
     def _wait_for_table_to_load(self):
-        wait = WebDriverWait(self.driver, 20)
-        wait.until(self.table_present_in_page)
+        wait = WebDriverWait(self._driver, 20)
+        wait.until(self._table_present_in_page)
 
     def download_data_for_window(
         self, download_window: DownloadWindow
@@ -167,7 +167,7 @@ class PriceDataDownloaderBot:
         Downloads the data_archived for the date range. The data
         is downloaded in batches of batch_size_in_days
         The steps it follows are:
-        1. Extract the delivery period dropdown from the driver
+        1. Extract the delivery period dropdown from the _driver
         2. Select the "Select Range" option from the dropdown
         3. Render the page with the new dates
         4. Download the data_archived for the new dates
@@ -175,14 +175,14 @@ class PriceDataDownloaderBot:
         price_data = []
         try:
             delivery_period_dropdown = (
-                self.extract_delivery_period_dropdown_from_driver()
+                self._extract_delivery_period_dropdown_from_driver()
             )
-            self.select_and_click_range_from_delivery_period_dropdown(
+            self._select_and_click_range_from_delivery_period_dropdown(
                 delivery_period_dropdown,
             )
 
             while download_window.start_datetime <= download_window.end_datetime:
-                self.render_page_with_new_dates(
+                self._render_page_with_new_dates(
                     download_window.start_datetime,
                     download_window.start_datetime
                     + datetime.timedelta(
@@ -194,12 +194,12 @@ class PriceDataDownloaderBot:
                 except TimeoutError:
                     logger.error(
                         "Timeout error occurred while waiting for the "
-                        "data to load. Closing driver",
+                        "data to load. Closing _driver",
                     )
                     continue
 
-                downloaded_price_data = self.parsing_engine.parse_doc_to_price_data(
-                    self.driver.page_source,
+                downloaded_price_data = self._parsing_engine.parse_doc_to_price_data(
+                    self._driver.page_source,
                 )
                 price_data.extend(downloaded_price_data)
                 logger.debug(
@@ -212,9 +212,9 @@ class PriceDataDownloaderBot:
         except Exception as e:
             logging.exception(
                 f"Error occurred while downloading data_archived for datetime"
-                f" {download_window.start_datetime}. Closing driver ",
+                f" {download_window.start_datetime}. Closing _driver ",
                 exc_info=e,
             )
         finally:
-            self.driver.close()
+            self._driver.close()
         return price_data
