@@ -17,7 +17,7 @@ from iex_app.db.core import Session
 logger = logging.getLogger(__name__)
 
 
-def _create_record_if_doesnot_exist(
+def _create_price_record(
     db_session: Session,
     pit_data: BasePointInTimePriceData,
     db_price_model: sqlalchemy.orm.decl_api.DeclarativeMeta,
@@ -44,17 +44,13 @@ def _create_record_if_doesnot_exist(
     return pit_record
 
 
-def create_dam_record_if_doesnot_exist(
+def create_dam_price_record(
     db_session: Session, dam_pit_data: DAMPointInTimePriceData
 ) -> DAMPointInTimePriceDataDb:
-    return _create_record_if_doesnot_exist(
-        db_session, dam_pit_data, DAMPointInTimePriceDataDb
-    )
+    return _create_price_record(db_session, dam_pit_data, DAMPointInTimePriceDataDb)
 
 
-def create_rtm_record_if_doesnot_exist(
+def create_rtm_price_record(
     db_session: Session, rtm_pit_data: RTMPointInTimePriceData
 ) -> RTMPointInTimePriceDataDb:
-    return _create_record_if_doesnot_exist(
-        db_session, rtm_pit_data, RTMPointInTimePriceDataDb
-    )
+    return _create_price_record(db_session, rtm_pit_data, RTMPointInTimePriceDataDb)

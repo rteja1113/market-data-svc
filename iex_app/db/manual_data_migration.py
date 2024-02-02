@@ -5,7 +5,7 @@ import logging
 import click
 from dateutil import parser
 
-from iex_app.api.crud.basic_crud import create_dam_record_if_doesnot_exist
+from iex_app.api.crud.basic_crud import create_dam_price_record
 from iex_app.api.models.pydantic_models import DAMPointInTimePriceData
 from iex_app.common.constants import MARKET_TZ
 from iex_app.db.core import Session
@@ -45,7 +45,7 @@ def export_raw_dam_data_into_db(json_path) -> None:
     dam_pit_pyd_models = _convert_dict_to_pyd(dam_pit_rows)
     try:
         for dam_pit_data in dam_pit_pyd_models:
-            _ = create_dam_record_if_doesnot_exist(session, dam_pit_data)
+            _ = create_dam_price_record(session, dam_pit_data)
             logger.info(
                 f"DAM price Record created"
                 f" for {dam_pit_data.settlement_period_start_datetime}"
