@@ -23,7 +23,7 @@ class BaseHtmlParsingEngine(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def determine_column_offset_by_row_id(cls, row_id: int) -> int:
+    def _determine_column_offset_by_row_id(cls, row_id: int) -> int:
         """
         Determines the offset of the columns in the row based on the row id.
         Unfortunately, every row has a different number of columns,
@@ -33,7 +33,7 @@ class BaseHtmlParsingEngine(abc.ABC):
 
     @classmethod
     @abc.abstractmethod
-    def parse_row_data(
+    def _parse_row_data_to_pydantic(
         cls,
         row: bs4.element.Tag,
         trading_day_beginning_datetime: datetime.datetime,
@@ -58,10 +58,10 @@ class BaseHtmlParsingEngine(abc.ABC):
         all zones for that datetime.
         """
         cells = row.find_all("td")
-        column_offset = cls.determine_column_offset_by_row_id(row_id)
+        column_offset = cls._determine_column_offset_by_row_id(row_id)
         price_datetime = (
             trading_day_beginning_datetime
-            + cls.parse_time_interval_from_cell(
+            + cls._parse_time_interval_from_cell(
                 cells[1 + column_offset],
             )
         )
@@ -78,7 +78,7 @@ class BaseHtmlParsingEngine(abc.ABC):
         return price_datetime, energy_prices
 
     @staticmethod
-    def parse_time_interval_from_cell(cell: bs4.element.Tag) -> datetime.timedelta:
+    def _parse_time_interval_from_cell(cell: bs4.element.Tag) -> datetime.timedelta:
         """
         The cell has text in the format "HH:MM - HH:MM" where the first time is
         the start of the time interval and the second
@@ -104,7 +104,7 @@ class BaseHtmlParsingEngine(abc.ABC):
         return False
 
     @classmethod
-    def get_price_table_from_page(cls, page: bs4.BeautifulSoup) -> bs4.element.Tag:
+    def _get_price_table_from_page(cls, page: bs4.BeautifulSoup) -> bs4.element.Tag:
         """
         Gets the price table from the page. The price table is the table
         with DAM_TABLE_NUM_COLS columns
@@ -121,7 +121,7 @@ class BaseHtmlParsingEngine(abc.ABC):
             )
 
     @staticmethod
-    def get_trading_day_start_datetime_from_price_table(
+    def _get_trading_day_start_datetime_from_price_table(
         price_table: bs4.element.Tag,
     ) -> datetime.datetime:
         """
@@ -139,7 +139,7 @@ class BaseHtmlParsingEngine(abc.ABC):
         return day_beginning_datetime
 
     @classmethod
-    def parse_all_rows_from_price_table(
+    def _parse_all_rows_from_price_table(
         cls,
         price_table: bs4.element.Tag,
         trading_day_beginning_datetime: datetime.datetime,
@@ -158,7 +158,7 @@ class BaseHtmlParsingEngine(abc.ABC):
 
         # parse rows
         for row_id in range(cls.DATA_ROW_OFFSET, num_rows):
-            curr_pit_data = cls.parse_row_data(
+            curr_pit_data = cls._parse_row_data_to_pydantic(
                 rows[row_id],
                 trading_day_beginning_datetime,
                 row_id,
@@ -171,13 +171,13 @@ class BaseHtmlParsingEngine(abc.ABC):
         cls, html_content: str
     ) -> list[BasePointInTimePriceData]:
         page_soup = bs4.BeautifulSoup(html_content, "html.parser")
-        price_table: bs4.element.Tag = cls.get_price_table_from_page(page_soup)
+        price_table: bs4.element.Tag = cls._get_price_table_from_page(page_soup)
         trading_day_beginning_datetime = (
-            cls.get_trading_day_start_datetime_from_price_table(
+            cls._get_trading_day_start_datetime_from_price_table(
                 price_table,
             )
         )
-        price_data = cls.parse_all_rows_from_price_table(
+        price_data = cls._parse_all_rows_from_price_table(
             price_table,
             trading_day_beginning_datetime,
         )
@@ -190,7 +190,7 @@ class DAMHtmlParsingEngine(BaseHtmlParsingEngine):
     PRICE_TABLE_NUM_COLS = 18
 
     @classmethod
-    def determine_column_offset_by_row_id(cls, row_id: int) -> int:
+    def _determine_column_offset_by_row_id(cls, row_id: int) -> int:
         """
         Determines the offset of the columns in the row based on the row id.
         Unfortunately, every row has a different number of columns, so we need
@@ -204,7 +204,7 @@ class DAMHtmlParsingEngine(BaseHtmlParsingEngine):
             return 0
 
     @classmethod
-    def parse_row_data(
+    def _parse_row_data_to_pydantic(
         cls,
         row: bs4.element.Tag,
         trading_day_beginning_datetime: datetime.datetime,
@@ -240,7 +240,7 @@ class RTMHtmlParsingEngine(BaseHtmlParsingEngine):
     DATA_ROW_OFFSET = 2
 
     @classmethod
-    def determine_column_offset_by_row_id(cls, row_id: int) -> int:
+    def _determine_column_offset_by_row_id(cls, row_id: int) -> int:
         """
         Determines the offset of the columns in the row based on the row id.
         Unfortunately, every row has a different number of columns, so we need
@@ -254,7 +254,7 @@ class RTMHtmlParsingEngine(BaseHtmlParsingEngine):
             return (row_id - 1) % 2
 
     @classmethod
-    def parse_row_data(
+    def _parse_row_data_to_pydantic(
         cls,
         row: bs4.element.Tag,
         trading_day_beginning_datetime: datetime.datetime,
