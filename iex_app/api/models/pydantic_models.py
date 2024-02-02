@@ -5,6 +5,8 @@ import datetime
 
 from pydantic import BaseModel, ConfigDict, field_serializer
 
+from iex_app.common.enums import Markets
+
 
 class BasePointInTimePriceData(BaseModel, abc.ABC):
     """
@@ -53,3 +55,9 @@ class RTMPointInTimePriceData(BasePointInTimePriceData):
     """
 
     session_id: str | None = None
+
+
+MARKETTYPE_TO_PRICE_PYD_MODEL_MAP = {
+    Markets.DAM: DAMPointInTimePriceData,
+    Markets.RTM: RTMPointInTimePriceData,
+}
