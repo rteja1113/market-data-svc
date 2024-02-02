@@ -44,13 +44,13 @@ def _convert_dict_to_pyd(json_data: list[dict]) -> list[BasePointInTimePriceData
 
 
 def _if_path_matches_price_type(json_path: str, price_type: str) -> bool:
-    if "rtm" in json_path or "RTM" in json_path and price_type == Markets.DAM.name:
+    if ("rtm" in json_path or "RTM" in json_path) and price_type == Markets.DAM.name:
         return click.confirm(
             "The json_path seems to point to RTM price json "
             "data and you are trying to add a record to"
             " DAM price table. Do you wish to continue?"
         )
-    elif "dam" in json_path or "DAM" in json_path and price_type == Markets.RTM.name:
+    elif ("dam" in json_path or "DAM" in json_path) and price_type == Markets.RTM.name:
         return click.confirm(
             "The json_path seems to point to DAM price json "
             "data and you are trying to add a record to"
