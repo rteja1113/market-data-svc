@@ -12,6 +12,7 @@ from iex_app.api.models.pydantic_models import (
     DAMPointInTimePriceData,
     RTMPointInTimePriceData,
 )
+from iex_app.common.enums import Markets
 from iex_app.db.core import Session
 
 logger = logging.getLogger(__name__)
@@ -54,3 +55,9 @@ def create_rtm_price_record(
     db_session: Session, rtm_pit_data: RTMPointInTimePriceData
 ) -> RTMPointInTimePriceDataDb:
     return _create_price_record(db_session, rtm_pit_data, RTMPointInTimePriceDataDb)
+
+
+MARKET_TO_DB_INSERTING_FN_MAP = {
+    Markets.DAM: create_dam_price_record,
+    Markets.RTM: create_rtm_price_record,
+}
