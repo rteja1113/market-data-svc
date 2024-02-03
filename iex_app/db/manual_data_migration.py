@@ -62,8 +62,6 @@ def _if_path_matches_price_type(json_path: str, price_type: str) -> bool:
 def _get_row_inserting_fn_from_price_type(price_type: str) -> Union[Callable | None]:
     price_enum = Markets[price_type]
     row_inserting_fn = MARKET_TO_DB_INSERTING_FN_MAP.get(price_enum)
-    # if row_inserting_fn is None:
-    #     raise ValueError(f"Invalid price type: {price_type}")
     return row_inserting_fn
 
 
