@@ -2,10 +2,12 @@ from sqlalchemy_utils import create_database, database_exists
 
 from alembic import command as alembic_command
 from alembic.config import Config as AlembicConfig
-from iex_app.db.core import ALEMBIC_INI_PATH  # type: ignore
-from iex_app.db.core import ALEMBIC_REVISION_PATH  # type: ignore
-from iex_app.db.core import SQLALCHEMY_DATABASE_URI  # type: ignore
-from iex_app.db.core import Base
+from iex_app.db.core import (
+    ALEMBIC_INI_PATH,
+    ALEMBIC_REVISION_PATH,
+    SQLALCHEMY_DATABASE_URI,
+    Base,
+)
 
 
 def version_schema(script_location: str):
