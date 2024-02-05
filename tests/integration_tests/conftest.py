@@ -1,3 +1,5 @@
+import os.path
+
 import pytest
 from sqlalchemy_utils import database_exists, drop_database
 from starlette.config import environ
@@ -7,12 +9,8 @@ environ["DB_PASSWORD"] = "RaviTeja_93"  # noqa
 environ["DB_HOST"] = "localhost"  # noqa
 environ["DB_PORT"] = "5432"  # noqa
 environ["DB_NAME"] = "test_iex_app"  # noqa
-environ[
-    "ALEMBIC_REVISION_PATH"
-] = "/Users/ravigutta/Documents/python-projects/iex_app/alembic"  # noqa
-environ[
-    "ALEMBIC_INI_PATH"
-] = "/Users/ravigutta/Documents/python-projects/iex_app/alembic.ini"  # noqa
+environ["ALEMBIC_REVISION_PATH"] = os.path.join(os.getcwd(), "alembic")  # noqa
+environ["ALEMBIC_INI_PATH"] = os.path.join(os.getcwd(), "alembic.ini")  # noqa
 
 from iex_app.db.core import SQLALCHEMY_DATABASE_URI, engine  # noqa
 from iex_app.db.manage import init_database  # noqa
