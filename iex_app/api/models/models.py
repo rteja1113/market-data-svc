@@ -1,5 +1,6 @@
 from sqlalchemy import Column, DateTime, Float, Integer, String
 
+from iex_app.common.enums import Markets
 from iex_app.db.core import Base
 
 
@@ -31,3 +32,9 @@ class DAMPointInTimePriceDataDb(BasePointInTimePriceDataDb):
 class RTMPointInTimePriceDataDb(BasePointInTimePriceDataDb):
     __tablename__ = "rtm_prices"
     session_id = Column(String)
+
+
+MARKETTYPE_TO_ORM_MAP = {
+    Markets.DAM: DAMPointInTimePriceDataDb,
+    Markets.RTM: RTMPointInTimePriceDataDb,
+}
