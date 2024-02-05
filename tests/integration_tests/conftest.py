@@ -4,8 +4,8 @@ import pytest
 from sqlalchemy_utils import database_exists, drop_database
 from starlette.config import environ
 
-environ["DB_USER"] = "postgres"  # noqa
-environ["DB_PASSWORD"] = "RaviTeja_93"  # noqa
+environ["DB_USER"] = "test_user"  # noqa
+environ["DB_PASSWORD"] = "test_password"  # noqa
 environ["DB_HOST"] = "localhost"  # noqa
 environ["DB_PORT"] = "5432"  # noqa
 environ["DB_NAME"] = "test_iex_app"  # noqa
