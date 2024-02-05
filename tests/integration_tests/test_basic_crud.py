@@ -2,16 +2,11 @@ import datetime
 
 import pytest
 
-from iex_app.api.crud.basic_crud import create_dam_price_record, create_rtm_price_record
-from iex_app.api.models.models import (
-    DAMPointInTimePriceDataDb,
-    RTMPointInTimePriceDataDb,
-)
-from iex_app.api.models.pydantic_models import (
-    DAMPointInTimePriceData,
-    RTMPointInTimePriceData,
-)
+from iex_app.api.crud.basic_crud import MARKET_TO_DB_INSERTING_FN_MAP
+from iex_app.api.models.models import MARKETTYPE_TO_ORM_MAP
+from iex_app.api.models.pydantic_models import MARKETTYPE_TO_PRICE_PYD_MODEL_MAP
 from iex_app.common.constants import MARKET_TZ
+from iex_app.common.enums import Markets
 
 
 @pytest.fixture
@@ -25,8 +20,9 @@ def mock_prices():
 
 
 @pytest.fixture
-def mock_dam_price_data(mock_datetime, mock_prices):
-    return DAMPointInTimePriceData(
+def pyd_model(request, mock_datetime, mock_prices):
+    pyd_class = MARKETTYPE_TO_PRICE_PYD_MODEL_MAP.get(Markets[request.param])
+    return pyd_class(
         settlement_period_start_datetime=mock_datetime,
         a1_price_in_rs_per_mwh=mock_prices[0],
         a2_price_in_rs_per_mwh=mock_prices[1],
@@ -45,52 +41,23 @@ def mock_dam_price_data(mock_datetime, mock_prices):
     )
 
 
-@pytest.fixture
-def mock_rtm_price_data(mock_datetime, mock_prices):
-    return RTMPointInTimePriceData(
-        settlement_period_start_datetime=mock_datetime,
-        a1_price_in_rs_per_mwh=mock_prices[0],
-        a2_price_in_rs_per_mwh=mock_prices[1],
-        e1_price_in_rs_per_mwh=mock_prices[2],
-        e2_price_in_rs_per_mwh=mock_prices[3],
-        n1_price_in_rs_per_mwh=mock_prices[4],
-        n2_price_in_rs_per_mwh=mock_prices[5],
-        n3_price_in_rs_per_mwh=mock_prices[6],
-        s1_price_in_rs_per_mwh=mock_prices[7],
-        s2_price_in_rs_per_mwh=mock_prices[8],
-        s3_price_in_rs_per_mwh=mock_prices[9],
-        w1_price_in_rs_per_mwh=mock_prices[10],
-        w2_price_in_rs_per_mwh=mock_prices[11],
-        w3_price_in_rs_per_mwh=mock_prices[12],
-        mcp_price_in_rs_per_mwh=mock_prices[13],
-    )
+@pytest.mark.parametrize(
+    "pyd_model, price_type", [("DAM", "DAM"), ("RTM", "RTM")], indirect=["pyd_model"]
+)
+def test_inserting_records(session, pyd_model, price_type):
+    market_type_enum = Markets[price_type]
+    row_inserting_fn = MARKET_TO_DB_INSERTING_FN_MAP.get(market_type_enum)
+    db_model = row_inserting_fn(session, pyd_model)
+    assert isinstance(db_model, MARKETTYPE_TO_ORM_MAP.get(market_type_enum))
 
 
-def test_create_dam_price_record(session, mock_dam_price_data):
-    dam_record = create_dam_price_record(session, mock_dam_price_data)
-    assert isinstance(dam_record, DAMPointInTimePriceDataDb)
-    assert dam_record.mcp_price_in_rs_per_mwh == 10.0
+@pytest.mark.parametrize(
+    "pyd_model, price_type", [("DAM", "DAM"), ("RTM", "RTM")], indirect=["pyd_model"]
+)
+def test_query_table_to_check_state(session, pyd_model, price_type):
+    market_type_enum = Markets[price_type]
+    row_inserting_fn = MARKET_TO_DB_INSERTING_FN_MAP.get(market_type_enum)
+    db_model = row_inserting_fn(session, pyd_model)
     assert (
-        dam_record.settlement_period_start_datetime
-        == mock_dam_price_data.settlement_period_start_datetime
+        session.query(MARKETTYPE_TO_ORM_MAP.get(market_type_enum)).first() == db_model
     )
-
-
-def test_query_dam_table(session, mock_dam_price_data):
-    dam_record = create_dam_price_record(session, mock_dam_price_data)
-    assert session.query(DAMPointInTimePriceDataDb).first() == dam_record
-
-
-def test_create_rtm_price_record(session, mock_rtm_price_data):
-    rtm_record = create_rtm_price_record(session, mock_rtm_price_data)
-    assert isinstance(rtm_record, RTMPointInTimePriceDataDb)
-    assert rtm_record.mcp_price_in_rs_per_mwh == 10.0
-    assert (
-        rtm_record.settlement_period_start_datetime
-        == mock_rtm_price_data.settlement_period_start_datetime
-    )
-
-
-def test_query_rtm_table(session, mock_rtm_price_data):
-    rtm_record = create_rtm_price_record(session, mock_rtm_price_data)
-    assert session.query(RTMPointInTimePriceDataDb).first() == rtm_record
