@@ -8,7 +8,7 @@ environ["DB_USER"] = "test_user"  # noqa
 environ["DB_PASSWORD"] = "test_password"  # noqa
 environ["DB_HOST"] = "localhost"  # noqa
 environ["DB_PORT"] = "5432"  # noqa
-environ["DB_NAME"] = "test_iex_app"  # noqa
+environ["DB_NAME"] = "test_iex_db"  # noqa
 environ["ALEMBIC_REVISION_PATH"] = os.path.join(os.getcwd(), "alembic")  # noqa
 environ["ALEMBIC_INI_PATH"] = os.path.join(os.getcwd(), "alembic.ini")  # noqa
 
