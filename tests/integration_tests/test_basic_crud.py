@@ -48,16 +48,10 @@ def test_inserting_records(session, pyd_model, price_type):
     market_type_enum = Markets[price_type]
     row_inserting_fn = MARKET_TO_DB_INSERTING_FN_MAP.get(market_type_enum)
     db_model = row_inserting_fn(session, pyd_model)
+
+    # check instance type
     assert isinstance(db_model, MARKETTYPE_TO_ORM_MAP.get(market_type_enum))
-
-
-@pytest.mark.parametrize(
-    "pyd_model, price_type", [("DAM", "DAM"), ("RTM", "RTM")], indirect=["pyd_model"]
-)
-def test_query_table_to_check_state(session, pyd_model, price_type):
-    market_type_enum = Markets[price_type]
-    row_inserting_fn = MARKET_TO_DB_INSERTING_FN_MAP.get(market_type_enum)
-    db_model = row_inserting_fn(session, pyd_model)
+    # check by querying the db
     assert (
         session.query(MARKETTYPE_TO_ORM_MAP.get(market_type_enum)).first() == db_model
     )
