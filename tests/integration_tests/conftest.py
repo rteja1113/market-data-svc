@@ -2,9 +2,12 @@ import datetime
 import os.path
 
 import pytest
-from sqlalchemy_utils import database_exists, drop_database
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from starlette.config import environ
 
+from alembic import command
+from alembic.config import Config as AlembicConfig
 from iex_app.api.models.pydantic_models import MARKETTYPE_TO_PRICE_PYD_MODEL_MAP
 from iex_app.common.constants import MARKET_TZ
 from iex_app.common.enums import Markets
@@ -17,32 +20,37 @@ environ["DB_NAME"] = "test_iex_db"  # noqa
 environ["ALEMBIC_REVISION_PATH"] = os.path.join(os.getcwd(), "alembic")  # noqa
 environ["ALEMBIC_INI_PATH"] = os.path.join(os.getcwd(), "alembic.ini")  # noqa
 
-from iex_app.db.core import SQLALCHEMY_DATABASE_URI, engine  # noqa
-from iex_app.db.manage import init_database  # noqa
-from tests.integration_tests.database import Session  # noqa
+from iex_app.db.core import SQLALCHEMY_DATABASE_URI  # noqa
 
 
 @pytest.fixture(scope="session")
-def db():
-    if database_exists(str(SQLALCHEMY_DATABASE_URI)):
-        drop_database(str(SQLALCHEMY_DATABASE_URI))
-
-    init_database(engine)
-    Session.configure(bind=engine)
-    yield
-    drop_database(str(SQLALCHEMY_DATABASE_URI))
+def engine():
+    db_url = SQLALCHEMY_DATABASE_URI
+    engine = create_engine(db_url)
+    return engine
 
 
-@pytest.fixture(scope="function", autouse=True)
-def session(db):
-    """
-    Creates a new database session with (with working transaction)
-    for test duration.
-    """
+@pytest.fixture(scope="session", autouse=True)
+def apply_migrations(engine):
+    alembic_config = AlembicConfig("alembic.ini")  # Adjust the path as necessary
+    alembic_config.set_main_option("sqlalchemy.url", str(engine.url))
+
+    # Apply migrations
+    command.upgrade(alembic_config, "head")
+
+
+@pytest.fixture(scope="session")
+def Session(engine):
+    Session = sessionmaker(bind=engine)
+    return Session
+
+
+@pytest.fixture(scope="function")
+def session(Session):
     session = Session()
-    session.begin_nested()
     yield session
     session.rollback()
+    session.close()
 
 
 @pytest.fixture
