@@ -3,7 +3,9 @@ from __future__ import annotations
 import abc
 import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, field_serializer
+
+from iex_app.common.enums import Markets
 
 
 class BasePointInTimePriceData(BaseModel, abc.ABC):
@@ -30,6 +32,10 @@ class BasePointInTimePriceData(BaseModel, abc.ABC):
     w3_price_in_rs_per_mwh: float | None = None
     mcp_price_in_rs_per_mwh: float | None = None
 
+    @field_serializer("settlement_period_start_datetime")
+    def serialize_settlement_period_start_datetime(self, value):
+        return value.isoformat()
+
 
 class DAMPointInTimePriceData(BasePointInTimePriceData):
     """
@@ -49,3 +55,9 @@ class RTMPointInTimePriceData(BasePointInTimePriceData):
     """
 
     session_id: str | None = None
+
+
+MARKETTYPE_TO_PRICE_PYD_MODEL_MAP = {
+    Markets.DAM: DAMPointInTimePriceData,
+    Markets.RTM: RTMPointInTimePriceData,
+}

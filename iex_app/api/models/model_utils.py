@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import pandas as pd
 
-from iex_app.api.models.data import BasePointInTimePriceData
+from iex_app.api.models.pydantic_models import BasePointInTimePriceData
 
 
 def convert_list_of_price_data_to_dataframe(

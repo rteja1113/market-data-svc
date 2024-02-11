@@ -3,7 +3,10 @@ from unittest import mock
 
 import pytest
 
-from iex_app.api.models.data import DAMPointInTimePriceData, RTMPointInTimePriceData
+from iex_app.api.models.pydantic_models import (
+    DAMPointInTimePriceData,
+    RTMPointInTimePriceData,
+)
 from iex_app.common.models import DownloadWindow
 from iex_app.scraping.parsing_engines import DAMHtmlParsingEngine, RTMHtmlParsingEngine
 from iex_app.scraping.price_data_bots import PriceDataDownloaderBot

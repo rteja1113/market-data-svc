@@ -1,6 +1,9 @@
 import pytest
 
-from iex_app.api.models.data import DAMPointInTimePriceData, RTMPointInTimePriceData
+from iex_app.api.models.pydantic_models import (
+    DAMPointInTimePriceData,
+    RTMPointInTimePriceData,
+)
 from iex_app.scraping.parsing_engines import DAMHtmlParsingEngine, RTMHtmlParsingEngine
 
 

@@ -3,8 +3,11 @@ import datetime
 import pandas as pd
 import pytest
 
-from iex_app.api.models.data import DAMPointInTimePriceData, RTMPointInTimePriceData
 from iex_app.api.models.model_utils import convert_list_of_price_data_to_dataframe
+from iex_app.api.models.pydantic_models import (
+    DAMPointInTimePriceData,
+    RTMPointInTimePriceData,
+)
 from iex_app.common.constants import MARKET_TZ
 
 
