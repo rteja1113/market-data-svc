@@ -32,7 +32,7 @@ def engine():
 
 @pytest.fixture(scope="session", autouse=True)
 def apply_migrations(engine):
-    alembic_config = AlembicConfig("alembic.ini")  # Adjust the path as necessary
+    alembic_config = AlembicConfig(environ.get("ALEMBIC_INI_PATH"))
     alembic_config.set_main_option("sqlalchemy.url", str(engine.url))
 
     # Apply migrations
