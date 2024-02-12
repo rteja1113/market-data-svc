@@ -27,6 +27,7 @@ sqlalchemy-utils = "^0.41.1"
 pytest = "^7.4.4"
 pre-commit = "^3.6.0"
 flake8-import-order = "^0.18.2"
+pytest-cov = "^4.1.0"
 
 [build-system]
 requires = ["poetry-core"]
