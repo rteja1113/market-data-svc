@@ -3,7 +3,7 @@ import datetime
 from selenium import webdriver
 
 from iex_app.api.models.model_utils import convert_list_of_price_data_to_dataframe
-from iex_app.common.models import DownloadWindow
+from iex_app.common.models import TimeFrame
 from iex_app.scraping.parsing_engines import DAMHtmlParsingEngine
 from iex_app.scraping.price_data_bots import PriceDataDownloaderBot
 from iex_app.scraping.price_page_properties import DAMPricePageProperties
@@ -15,7 +15,7 @@ dam_price_web_bot = PriceDataDownloaderBot(
     page_properties=DAMPricePageProperties(),
 )
 # initialize the download window for the bot
-download_window = DownloadWindow(
+download_window = TimeFrame(
     start_datetime=datetime.datetime(2021, 1, 1),
     end_datetime=datetime.datetime(2021, 1, 3),
 )
