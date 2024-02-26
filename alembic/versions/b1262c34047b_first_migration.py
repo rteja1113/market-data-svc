@@ -1,8 +1,8 @@
-"""initial
+"""first migration
 
-Revision ID: 1a32a88f63e5
+Revision ID: b1262c34047b
 Revises:
-Create Date: 2024-01-28 19:49:36.564309
+Create Date: 2024-02-25 22:48:05.768784
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "1a32a88f63e5"
+revision: str = "b1262c34047b"
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -23,11 +23,7 @@ def upgrade() -> None:
     op.create_table(
         "dam_prices",
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column(
-            "settlement_period_start_datetime",
-            sa.DateTime(timezone=True),
-            nullable=True,
-        ),
+        sa.Column("settlement_period_start_timestamp", sa.BigInteger(), nullable=True),
         sa.Column("a1_price_in_rs_per_mwh", sa.Float(), nullable=True),
         sa.Column("a2_price_in_rs_per_mwh", sa.Float(), nullable=True),
         sa.Column("e1_price_in_rs_per_mwh", sa.Float(), nullable=True),
@@ -48,11 +44,7 @@ def upgrade() -> None:
         "rtm_prices",
         sa.Column("session_id", sa.String(), nullable=True),
         sa.Column("id", sa.Integer(), nullable=False),
-        sa.Column(
-            "settlement_period_start_datetime",
-            sa.DateTime(timezone=True),
-            nullable=True,
-        ),
+        sa.Column("settlement_period_start_timestamp", sa.BigInteger(), nullable=True),
         sa.Column("a1_price_in_rs_per_mwh", sa.Float(), nullable=True),
         sa.Column("a2_price_in_rs_per_mwh", sa.Float(), nullable=True),
         sa.Column("e1_price_in_rs_per_mwh", sa.Float(), nullable=True),
