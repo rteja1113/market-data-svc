@@ -13,6 +13,7 @@ from iex_app.api.models.pydantic_models import (
     RTMPointInTimePriceData,
 )
 from iex_app.common.enums import Markets
+from iex_app.common.models import TimeFrame
 from iex_app.db.core import Session
 
 logger = logging.getLogger(__name__)
@@ -26,8 +27,8 @@ def _create_price_record(
     existing_record = (
         db_session.query(db_price_model)
         .filter(
-            db_price_model.settlement_period_start_datetime
-            == pit_data.settlement_period_start_datetime
+            db_price_model.settlement_period_start_timestamp
+            == pit_data.settlement_period_start_datetime.timestamp()
         )
         .first()
     )
@@ -37,8 +38,12 @@ def _create_price_record(
             f"Record already exists for {pit_data.settlement_period_start_datetime}"
         )
         return existing_record
-
-    pit_record = db_price_model(**pit_data.model_dump())
+    pyd_model_dump = pit_data.model_dump()
+    pyd_model_dump[
+        "settlement_period_start_timestamp"
+    ] = pit_data.settlement_period_start_datetime.timestamp()
+    pyd_model_dump.pop("settlement_period_start_datetime")
+    pit_record = db_price_model(**pyd_model_dump)
     db_session.add(pit_record)
     db_session.commit()
     db_session.refresh(pit_record)
@@ -55,6 +60,36 @@ def create_rtm_price_record(
     db_session: Session, rtm_pit_data: RTMPointInTimePriceData
 ) -> RTMPointInTimePriceDataDb:
     return _create_price_record(db_session, rtm_pit_data, RTMPointInTimePriceDataDb)
+
+
+def _get_price_records(
+    db_session: Session,
+    time_frame: TimeFrame,
+    db_price_model: sqlalchemy.orm.decl_api.DeclarativeMeta,
+) -> list[BasePointInTimePriceDataDb]:
+    records = (
+        db_session.query(db_price_model)
+        .filter(
+            db_price_model.settlement_period_start_timestamp.between(
+                time_frame.start_datetime.timestamp(),
+                time_frame.end_datetime.timestamp(),
+            )
+        )
+        .all()
+    )
+    return records
+
+
+def get_dam_price_records(
+    db_session: Session, time_frame: TimeFrame
+) -> list[DAMPointInTimePriceDataDb]:
+    return _get_price_records(db_session, time_frame, DAMPointInTimePriceDataDb)
+
+
+def get_rtm_price_records(
+    db_session: Session, time_frame: TimeFrame
+) -> list[RTMPointInTimePriceDataDb]:
+    return _get_price_records(db_session, time_frame, RTMPointInTimePriceDataDb)
 
 
 MARKET_TO_DB_INSERTING_FN_MAP = {
