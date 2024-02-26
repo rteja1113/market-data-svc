@@ -59,6 +59,9 @@ def read_dam_price_records(
     end_datetime_str: Annotated[str, Query(alias="end_datetime")],
     db: Session = Depends(get_db),
 ) -> list[DAMPointInTimePriceData]:
+    """
+    Fetches the DAM price records for the given time frame
+    """
     try:
         start_datetime = _convert_string_to_datetime(start_datetime_str)
     except ValueError:
@@ -113,6 +116,9 @@ def read_rtm_price_records(
     end_datetime_str: Annotated[str, Query(alias="end_datetime")],
     db: Session = Depends(get_db),
 ) -> list[RTMPointInTimePriceData]:
+    """
+    Fetches the RTM price records for the given time frame
+    """
     try:
         start_datetime = _convert_string_to_datetime(start_datetime_str)
     except ValueError:
