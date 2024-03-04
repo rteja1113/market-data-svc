@@ -2,11 +2,11 @@ import datetime
 
 from selenium import webdriver
 
-from iex_app.api.models.model_utils import convert_list_of_price_data_to_dataframe
-from iex_app.common.models import TimeFrame
-from iex_app.scraping.parsing_engines import DAMHtmlParsingEngine
-from iex_app.scraping.price_data_bots import PriceDataDownloaderBot
-from iex_app.scraping.price_page_properties import DAMPricePageProperties
+from src.common.models import TimeFrame
+from src.marketdata.schema_utils import convert_list_of_price_data_to_dataframe
+from src.migrations.automated.parsing_engines import DAMHtmlParsingEngine
+from src.migrations.automated.price_data_bot import PriceDataDownloaderBot
+from src.migrations.automated.price_page_properties import DAMPricePageProperties
 
 # We initialize the bot with a Chrome webdriver for downloading DAM price data
 dam_price_web_bot = PriceDataDownloaderBot(

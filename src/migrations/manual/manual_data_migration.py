@@ -5,14 +5,14 @@ import logging
 import click
 from dateutil import parser
 
-from iex_app.api.crud.basic_crud import MARKET_TO_DB_INSERTING_FN_MAP
-from iex_app.api.models.pydantic_models import (
+from src.common.constants import MARKET_TZ
+from src.common.enums import Markets
+from src.database import Session
+from src.marketdata.crud import MARKET_TO_DB_INSERTING_FN_MAP
+from src.marketdata.schemas import (
     MARKETTYPE_TO_PRICE_PYD_MODEL_MAP,
     BasePointInTimePriceData,
 )
-from iex_app.common.constants import MARKET_TZ
-from iex_app.common.enums import Markets
-from iex_app.db.core import Session
 
 session = Session()
 

@@ -8,10 +8,10 @@ from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
 
-from iex_app.api.models.pydantic_models import BasePointInTimePriceData
-from iex_app.common.models import TimeFrame
-from iex_app.scraping.parsing_engines import BaseHtmlParsingEngine
-from iex_app.scraping.price_page_properties import BasePricePageProperties
+from src.common.models import TimeFrame
+from src.marketdata.schemas import BasePointInTimePriceData
+from src.migrations.automated.parsing_engines import BaseHtmlParsingEngine
+from src.migrations.automated.price_page_properties import BasePricePageProperties
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

@@ -8,9 +8,9 @@ from starlette.config import environ
 
 from alembic import command
 from alembic.config import Config as AlembicConfig
-from iex_app.api.models.pydantic_models import MARKETTYPE_TO_PRICE_PYD_MODEL_MAP
-from iex_app.common.constants import MARKET_TZ
-from iex_app.common.enums import Markets
+from src.common.constants import MARKET_TZ
+from src.common.enums import Markets
+from src.marketdata.schemas import MARKETTYPE_TO_PRICE_PYD_MODEL_MAP
 
 environ["DB_USER"] = "test_user"  # noqa
 environ["DB_PASSWORD"] = "test_password"  # noqa
@@ -20,7 +20,7 @@ environ["DB_NAME"] = "test_iex_db"  # noqa
 environ["ALEMBIC_REVISION_PATH"] = os.path.join(os.getcwd(), "alembic")  # noqa
 environ["ALEMBIC_INI_PATH"] = os.path.join(os.getcwd(), "alembic.ini")  # noqa
 
-from iex_app.db.core import SQLALCHEMY_DATABASE_URI  # noqa
+from src.database import SQLALCHEMY_DATABASE_URI  # noqa
 
 
 @pytest.fixture(scope="session")
@@ -37,6 +37,15 @@ def apply_migrations(engine):
 
     # Apply migrations
     command.upgrade(alembic_config, "head")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_db(engine):
+    yield
+    # Cleanup code runs after all tests have completed
+    db_name = os.getenv("DB_NAME")
+    with engine.connect() as connection:
+        connection.execute(f"DROP DATABASE IF EXISTS {db_name}")
 
 
 @pytest.fixture(scope="session")

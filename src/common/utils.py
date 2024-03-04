@@ -2,7 +2,7 @@ import datetime
 
 import pytz
 
-from iex_app.common.constants import MARKET_TZ
+from src.common.constants import MARKET_TZ
 
 
 def convert_naive_datetime_in_utc_to_ist(

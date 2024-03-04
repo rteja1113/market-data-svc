@@ -2,21 +2,38 @@ import logging
 
 import sqlalchemy
 
-from iex_app.api.models.models import (
+from src.common.enums import Markets
+from src.common.models import TimeFrame
+from src.database import Session
+from src.marketdata.models import (
     BasePointInTimePriceDataDb,
     DAMPointInTimePriceDataDb,
     RTMPointInTimePriceDataDb,
 )
-from iex_app.api.models.pydantic_models import (
+from src.marketdata.schemas import (
     BasePointInTimePriceData,
     DAMPointInTimePriceData,
     RTMPointInTimePriceData,
 )
-from iex_app.common.enums import Markets
-from iex_app.common.models import TimeFrame
-from iex_app.db.core import Session
 
 logger = logging.getLogger(__name__)
+
+logger.setLevel(logging.DEBUG)
+
+# Create console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
+
+# Create formatter
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
+# Add formatter to console handler
+console_handler.setFormatter(formatter)
+
+# Add console handler to logger
+logger.addHandler(console_handler)
 
 
 def _create_price_record(

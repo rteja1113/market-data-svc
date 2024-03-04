@@ -1,10 +1,10 @@
 import pytest
 
-from iex_app.api.models.pydantic_models import (
-    DAMPointInTimePriceData,
-    RTMPointInTimePriceData,
+from src.marketdata.schemas import DAMPointInTimePriceData, RTMPointInTimePriceData
+from src.migrations.automated.parsing_engines import (
+    DAMHtmlParsingEngine,
+    RTMHtmlParsingEngine,
 )
-from iex_app.scraping.parsing_engines import DAMHtmlParsingEngine, RTMHtmlParsingEngine
 
 
 @pytest.fixture

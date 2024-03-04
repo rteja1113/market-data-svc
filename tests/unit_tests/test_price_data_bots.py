@@ -3,14 +3,14 @@ from unittest import mock
 
 import pytest
 
-from iex_app.api.models.pydantic_models import (
-    DAMPointInTimePriceData,
-    RTMPointInTimePriceData,
+from src.common.models import TimeFrame
+from src.marketdata.schemas import DAMPointInTimePriceData, RTMPointInTimePriceData
+from src.migrations.automated.parsing_engines import (
+    DAMHtmlParsingEngine,
+    RTMHtmlParsingEngine,
 )
-from iex_app.common.models import TimeFrame
-from iex_app.scraping.parsing_engines import DAMHtmlParsingEngine, RTMHtmlParsingEngine
-from iex_app.scraping.price_data_bots import PriceDataDownloaderBot
-from iex_app.scraping.price_page_properties import (
+from src.migrations.automated.price_data_bot import PriceDataDownloaderBot
+from src.migrations.automated.price_page_properties import (
     DAMPricePageProperties,
     RTMPricePageProperties,
 )

@@ -4,8 +4,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
-from iex_app.api.models import models  # noqa
-from iex_app.db.core import Base
+from src.database import Base
 
 # Get the actual values of the environment variables
 db_user = os.getenv("DB_USER")

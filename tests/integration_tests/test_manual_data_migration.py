@@ -1,9 +1,9 @@
 import pytest
 from click.testing import CliRunner
 
-from iex_app.api.models.models import MARKETTYPE_TO_ORM_MAP
-from iex_app.common.enums import Markets
-from iex_app.db.manual_data_migration import export_json_price_data_into_db
+from src.common.enums import Markets
+from src.marketdata.models import MARKETTYPE_TO_ORM_MAP
+from src.migrations.manual.manual_data_migration import export_json_price_data_into_db
 
 
 @pytest.mark.parametrize(
@@ -14,11 +14,11 @@ from iex_app.db.manual_data_migration import export_json_price_data_into_db
     ],
 )
 def test_export_json_price_data_into_db(monkeypatch, session, json_path, price_type):
-    monkeypatch.setattr("iex_app.db.manual_data_migration.session", session)
+    monkeypatch.setattr("src.migrations.manual_data_migration.session", session)
     runner = CliRunner()
     _ = runner.invoke(export_json_price_data_into_db, [json_path, price_type])
     market_type_enum = Markets[price_type]
 
-    # check that the record was inserted into the db
+    # check that the record was inserted into the migrations
     orm_instance = session.query(MARKETTYPE_TO_ORM_MAP.get(market_type_enum)).first()
     assert isinstance(orm_instance, MARKETTYPE_TO_ORM_MAP.get(market_type_enum))

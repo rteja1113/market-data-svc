@@ -2,20 +2,15 @@ import datetime
 import logging
 from typing import Annotated
 
-import pydantic
-import uvicorn
-from fastapi import Depends, FastAPI, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
-from iex_app.api.crud.basic_crud import get_dam_price_records, get_rtm_price_records
-from iex_app.api.models.pydantic_models import (
-    DAMPointInTimePriceData,
-    RTMPointInTimePriceData,
-)
-from iex_app.common.constants import MARKET_TZ
-from iex_app.common.models import TimeFrame
-from iex_app.common.utils import convert_naive_datetime_in_utc_to_ist
-from iex_app.db.core import Session  # noqa
+from src.common.constants import MARKET_TZ
+from src.common.models import TimeFrame
+from src.common.utils import convert_naive_datetime_in_utc_to_ist
+from src.database import Session  # noqa
+from src.marketdata.crud import get_dam_price_records, get_rtm_price_records
+from src.marketdata.schemas import DAMPointInTimePriceData, RTMPointInTimePriceData
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -36,7 +31,7 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 # Create a FastAPI app
-app = FastAPI()
+router = APIRouter(prefix="/marketdata")
 
 
 def get_db():
@@ -53,7 +48,20 @@ def _convert_string_to_datetime(datetime_string: str) -> datetime.datetime:
     )
 
 
-@app.get("/historicmarketdata/dam/")
+def _validate_and_convert_datetime_params(
+    start_datetime_str: str, end_datetime_str: str
+) -> TimeFrame:
+    try:
+        start_datetime = _convert_string_to_datetime(start_datetime_str)
+        end_datetime = _convert_string_to_datetime(end_datetime_str)
+        if start_datetime > end_datetime:
+            raise ValueError("start_datetime should be less than end_datetime")
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    return TimeFrame(start_datetime=start_datetime, end_datetime=end_datetime)
+
+
+@router.get("/dam")
 def read_dam_price_records(
     start_datetime_str: Annotated[str, Query(alias="start_datetime")],
     end_datetime_str: Annotated[str, Query(alias="end_datetime")],
@@ -62,23 +70,9 @@ def read_dam_price_records(
     """
     Fetches the DAM price records for the given time frame
     """
-    try:
-        start_datetime = _convert_string_to_datetime(start_datetime_str)
-    except ValueError:
-        logger.error(f"Invalid start_datetime: {start_datetime}")
-        return []
-
-    try:
-        end_datetime = _convert_string_to_datetime(end_datetime_str)
-    except ValueError:
-        logger.error(f"Invalid end_datetime: {end_datetime}")
-        return []
-
-    try:
-        time_frame = TimeFrame(start_datetime=start_datetime, end_datetime=end_datetime)
-    except pydantic.ValidationError as e:
-        logger.error(f"Invalid time_frame: {e}")
-        return []
+    time_frame = _validate_and_convert_datetime_params(
+        start_datetime_str, end_datetime_str
+    )
 
     price_records = get_dam_price_records(db, time_frame)
 
@@ -110,7 +104,7 @@ def read_dam_price_records(
     return price_pyd_models
 
 
-@app.get("/historicmarketdata/rtm/")
+@router.get("/rtm")
 def read_rtm_price_records(
     start_datetime_str: Annotated[str, Query(alias="start_datetime")],
     end_datetime_str: Annotated[str, Query(alias="end_datetime")],
@@ -119,24 +113,9 @@ def read_rtm_price_records(
     """
     Fetches the RTM price records for the given time frame
     """
-    try:
-        start_datetime = _convert_string_to_datetime(start_datetime_str)
-    except ValueError:
-        logger.error(f"Invalid start_datetime: {start_datetime}")
-        return []
-
-    try:
-        end_datetime = _convert_string_to_datetime(end_datetime_str)
-    except ValueError:
-        logger.error(f"Invalid end_datetime: {end_datetime}")
-        return []
-
-    try:
-        time_frame = TimeFrame(start_datetime=start_datetime, end_datetime=end_datetime)
-    except pydantic.ValidationError as e:
-        logger.error(f"Invalid time_frame: {e}")
-        return []
-
+    time_frame = _validate_and_convert_datetime_params(
+        start_datetime_str, end_datetime_str
+    )
     price_records = get_rtm_price_records(db, time_frame)
     price_pyd_models = []
     for price_record in price_records:
@@ -164,7 +143,3 @@ def read_rtm_price_records(
         )
         price_pyd_models.append(price_pyd_model)
     return price_pyd_models
-
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)

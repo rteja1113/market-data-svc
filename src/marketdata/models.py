@@ -1,7 +1,7 @@
 from sqlalchemy import BigInteger, Column, Float, Integer, String
 
-from iex_app.common.enums import Markets
-from iex_app.db.core import Base
+from src.common.enums import Markets
+from src.database import Base
 
 
 class BasePointInTimePriceDataDb(Base):
