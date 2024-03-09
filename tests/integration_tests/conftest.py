@@ -33,7 +33,10 @@ def engine():
 
 @pytest.fixture(scope="session", autouse=True)
 def create_database_and_apply_migrations(engine):
+    if database_exists(engine.url):
+        drop_database(engine.url)
     create_database(engine.url)
+
     alembic_config = AlembicConfig(environ.get("ALEMBIC_INI_PATH"))
     alembic_config.set_main_option("sqlalchemy.url", str(engine.url))
 
