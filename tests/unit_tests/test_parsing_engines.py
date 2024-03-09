@@ -1,7 +1,7 @@
 import pytest
 
 from src.marketdata.schemas import DAMPointInTimePriceData, RTMPointInTimePriceData
-from src.migrations.automated.parsing_engines import (
+from src.migrations.automated.scraping.parsing_engines import (
     DAMHtmlParsingEngine,
     RTMHtmlParsingEngine,
 )

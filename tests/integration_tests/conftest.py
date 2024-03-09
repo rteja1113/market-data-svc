@@ -4,6 +4,7 @@ import os.path
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import create_database, database_exists, drop_database
 from starlette.config import environ
 
 from alembic import command
@@ -31,7 +32,8 @@ def engine():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def apply_migrations(engine):
+def create_database_and_apply_migrations(engine):
+    create_database(engine.url)
     alembic_config = AlembicConfig(environ.get("ALEMBIC_INI_PATH"))
     alembic_config.set_main_option("sqlalchemy.url", str(engine.url))
 
@@ -43,9 +45,9 @@ def apply_migrations(engine):
 def cleanup_db(engine):
     yield
     # Cleanup code runs after all tests have completed
-    db_name = os.getenv("DB_NAME")
-    with engine.connect() as connection:
-        connection.execute(f"DROP DATABASE IF EXISTS {db_name}")
+    db_url = str(engine.url)
+    if database_exists(db_url):
+        drop_database(db_url)
 
 
 @pytest.fixture(scope="session")

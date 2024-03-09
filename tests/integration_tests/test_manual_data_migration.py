@@ -14,7 +14,7 @@ from src.migrations.manual.manual_data_migration import export_json_price_data_i
     ],
 )
 def test_export_json_price_data_into_db(monkeypatch, session, json_path, price_type):
-    monkeypatch.setattr("src.migrations.manual_data_migration.session", session)
+    monkeypatch.setattr("src.migrations.manual.manual_data_migration.session", session)
     runner = CliRunner()
     _ = runner.invoke(export_json_price_data_into_db, [json_path, price_type])
     market_type_enum = Markets[price_type]

@@ -5,12 +5,12 @@ import pytest
 
 from src.common.models import TimeFrame
 from src.marketdata.schemas import DAMPointInTimePriceData, RTMPointInTimePriceData
-from src.migrations.automated.parsing_engines import (
+from src.migrations.automated.scraping.parsing_engines import (
     DAMHtmlParsingEngine,
     RTMHtmlParsingEngine,
 )
-from src.migrations.automated.price_data_bot import PriceDataDownloaderBot
-from src.migrations.automated.price_page_properties import (
+from src.migrations.automated.scraping.price_data_bot import PriceDataDownloaderBot
+from src.migrations.automated.scraping.price_page_properties import (
     DAMPricePageProperties,
     RTMPricePageProperties,
 )
