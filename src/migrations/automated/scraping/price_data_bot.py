@@ -10,8 +10,10 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from src.common.models import TimeFrame
 from src.marketdata.schemas import BasePointInTimePriceData
-from src.migrations.automated.parsing_engines import BaseHtmlParsingEngine
-from src.migrations.automated.price_page_properties import BasePricePageProperties
+from src.migrations.automated.scraping.parsing_engines import BaseHtmlParsingEngine
+from src.migrations.automated.scraping.price_page_properties import (
+    BasePricePageProperties,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

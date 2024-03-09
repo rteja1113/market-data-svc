@@ -4,9 +4,11 @@ from selenium import webdriver
 
 from src.common.models import TimeFrame
 from src.marketdata.schema_utils import convert_list_of_price_data_to_dataframe
-from src.migrations.automated.parsing_engines import DAMHtmlParsingEngine
-from src.migrations.automated.price_data_bot import PriceDataDownloaderBot
-from src.migrations.automated.price_page_properties import DAMPricePageProperties
+from src.migrations.automated.scraping.parsing_engines import DAMHtmlParsingEngine
+from src.migrations.automated.scraping.price_data_bot import PriceDataDownloaderBot
+from src.migrations.automated.scraping.price_page_properties import (
+    DAMPricePageProperties,
+)
 
 # We initialize the bot with a Chrome webdriver for downloading DAM price data
 dam_price_web_bot = PriceDataDownloaderBot(
