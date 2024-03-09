@@ -2,7 +2,7 @@ from sqlalchemy_utils import create_database, database_exists
 
 from alembic import command as alembic_command
 from alembic.config import Config as AlembicConfig
-from iex_app.db.core import (
+from src.database import (
     ALEMBIC_INI_PATH,
     ALEMBIC_REVISION_PATH,
     SQLALCHEMY_DATABASE_URI,

@@ -8,10 +8,12 @@ from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
 
-from iex_app.api.models.pydantic_models import BasePointInTimePriceData
-from iex_app.common.models import DownloadWindow
-from iex_app.scraping.parsing_engines import BaseHtmlParsingEngine
-from iex_app.scraping.price_page_properties import BasePricePageProperties
+from src.common.models import TimeFrame
+from src.marketdata.schemas import BasePointInTimePriceData
+from src.migrations.automated.scraping.parsing_engines import BaseHtmlParsingEngine
+from src.migrations.automated.scraping.price_page_properties import (
+    BasePricePageProperties,
+)
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -161,7 +163,7 @@ class PriceDataDownloaderBot:
         wait.until(self._table_present_in_page)
 
     def download_data_for_window(
-        self, download_window: DownloadWindow
+        self, download_window: TimeFrame
     ) -> list[BasePointInTimePriceData]:
         """
         Downloads the data_archived for the date range. The data

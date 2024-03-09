@@ -6,12 +6,12 @@ import logging
 
 import bs4
 
-from iex_app.api.models.pydantic_models import (
+from src.common.constants import MARKET_TZ, NUM_TIME_STEPS_IN_HOUR
+from src.marketdata.schemas import (
     BasePointInTimePriceData,
     DAMPointInTimePriceData,
     RTMPointInTimePriceData,
 )
-from iex_app.common.constants import MARKET_TZ, NUM_TIME_STEPS_IN_HOUR
 
 logger = logging.getLogger(__name__)
 

@@ -4,13 +4,14 @@ import os.path
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy_utils import create_database, database_exists, drop_database
 from starlette.config import environ
 
 from alembic import command
 from alembic.config import Config as AlembicConfig
-from iex_app.api.models.pydantic_models import MARKETTYPE_TO_PRICE_PYD_MODEL_MAP
-from iex_app.common.constants import MARKET_TZ
-from iex_app.common.enums import Markets
+from src.common.constants import MARKET_TZ
+from src.common.enums import Markets
+from src.marketdata.schemas import MARKETTYPE_TO_PRICE_PYD_MODEL_MAP
 
 environ["DB_USER"] = "test_user"  # noqa
 environ["DB_PASSWORD"] = "test_password"  # noqa
@@ -20,7 +21,7 @@ environ["DB_NAME"] = "test_iex_db"  # noqa
 environ["ALEMBIC_REVISION_PATH"] = os.path.join(os.getcwd(), "alembic")  # noqa
 environ["ALEMBIC_INI_PATH"] = os.path.join(os.getcwd(), "alembic.ini")  # noqa
 
-from iex_app.db.core import SQLALCHEMY_DATABASE_URI  # noqa
+from src.database import SQLALCHEMY_DATABASE_URI  # noqa
 
 
 @pytest.fixture(scope="session")
@@ -31,12 +32,25 @@ def engine():
 
 
 @pytest.fixture(scope="session", autouse=True)
-def apply_migrations(engine):
+def create_database_and_apply_migrations(engine):
+    if database_exists(engine.url):
+        drop_database(engine.url)
+    create_database(engine.url)
+
     alembic_config = AlembicConfig(environ.get("ALEMBIC_INI_PATH"))
     alembic_config.set_main_option("sqlalchemy.url", str(engine.url))
 
     # Apply migrations
     command.upgrade(alembic_config, "head")
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_db(engine):
+    yield
+    # Cleanup code runs after all tests have completed
+    db_url = str(engine.url)
+    if database_exists(db_url):
+        drop_database(db_url)
 
 
 @pytest.fixture(scope="session")

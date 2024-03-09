@@ -1,8 +1,8 @@
 import pytest
 
-from iex_app.api.crud.basic_crud import MARKET_TO_DB_INSERTING_FN_MAP
-from iex_app.api.models.models import MARKETTYPE_TO_ORM_MAP
-from iex_app.common.enums import Markets
+from src.common.enums import Markets
+from src.marketdata.crud import MARKET_TO_DB_INSERTING_FN_MAP
+from src.marketdata.models import MARKETTYPE_TO_ORM_MAP
 
 
 @pytest.mark.parametrize(
@@ -17,7 +17,7 @@ def test_inserting_records(session, pyd_price_model, price_type):
 
     # check instance type
     assert isinstance(db_model, MARKETTYPE_TO_ORM_MAP.get(market_type_enum))
-    # check by querying the db
+    # check by querying the migrations
     assert (
         session.query(MARKETTYPE_TO_ORM_MAP.get(market_type_enum)).first() == db_model
     )

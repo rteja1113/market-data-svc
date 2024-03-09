@@ -1,6 +1,6 @@
 from urllib.parse import urljoin
 
-from iex_app.common.constants import BASE_MARKET_URL
+from src.common.constants import BASE_MARKET_URL
 
 
 class BasePricePageProperties:
