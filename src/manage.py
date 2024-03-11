@@ -1,39 +1,62 @@
-from sqlalchemy_utils import create_database, database_exists
+import logging
+from time import sleep
+
+import psycopg2
 
 from alembic import command as alembic_command
 from alembic.config import Config as AlembicConfig
 from src.database import (
     ALEMBIC_INI_PATH,
     ALEMBIC_REVISION_PATH,
-    SQLALCHEMY_DATABASE_URI,
-    Base,
+    DB_HOST,
+    DB_PASSWORD,
+    DB_PORT,
+    DB_USER,
 )
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+# Create console handler
+console_handler = logging.StreamHandler()
+console_handler.setLevel(logging.DEBUG)
 
-def version_schema(script_location: str):
+# Create formatter
+formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+
+# Add formatter to console handler
+console_handler.setFormatter(formatter)
+
+# Add console handler to logger
+logger.addHandler(console_handler)
+
+
+def wait_for_postgres():
+    num_attempts = 5
+    current_attempt = 0
+    while current_attempt < num_attempts:
+        try:
+            conn = psycopg2.connect(
+                dbname="postgres",
+                user=DB_USER,
+                password=DB_PASSWORD,
+                host=DB_HOST,
+                port=DB_PORT,
+            )
+            logger.info("Postgres is ready ! Closing the test connection")
+            conn.close()
+            break
+        except psycopg2.OperationalError:
+            logger.info("Postgres is not ready yet. Waiting...")
+            sleep(1)
+            current_attempt += 1
+
+
+def apply_migrations():
     """Applies alembic versioning to schema."""
 
     # add it to alembic table
     alembic_cfg = AlembicConfig(ALEMBIC_INI_PATH)
-    alembic_cfg.set_main_option("script_location", script_location)
-    alembic_command.stamp(alembic_cfg, "head")
-
-
-def get_all_tables():
-    """Fetches tables that belong to the 'dispatch_core' schema."""
-    all_tables = []
-    for _, table in Base.metadata.tables.items():
-        all_tables.append(table)
-    return all_tables
-
-
-def init_database(engine):
-    """Initializes the database."""
-    if not database_exists(str(SQLALCHEMY_DATABASE_URI)):
-        create_database(str(SQLALCHEMY_DATABASE_URI))
-
-    tables = get_all_tables()
-
-    Base.metadata.create_all(engine, tables=tables)
-
-    version_schema(script_location=ALEMBIC_REVISION_PATH)
+    alembic_cfg.set_main_option("script_location", ALEMBIC_REVISION_PATH)
+    alembic_command.upgrade(alembic_cfg, "head")
