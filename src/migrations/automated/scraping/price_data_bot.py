@@ -8,6 +8,7 @@ from selenium.webdriver.remote.webdriver import WebDriver as RemoteWebDriver
 from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.wait import WebDriverWait
 
+from src.common import logging_utils
 from src.common.models import TimeFrame
 from src.marketdata.schemas import BasePointInTimePriceData
 from src.migrations.automated.scraping.parsing_engines import BaseHtmlParsingEngine
@@ -15,23 +16,7 @@ from src.migrations.automated.scraping.price_page_properties import (
     BasePricePageProperties,
 )
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-# Create console handler
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-
-# Create formatter
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-
-# Add formatter to console handler
-console_handler.setFormatter(formatter)
-
-# Add console handler to logger
-logger.addHandler(console_handler)
+logger = logging_utils.create_logger(__name__)
 
 
 class PriceDataDownloaderBot:

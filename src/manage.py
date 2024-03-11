@@ -1,10 +1,10 @@
-import logging
 from time import sleep
 
 import psycopg2
 
 from alembic import command as alembic_command
 from alembic.config import Config as AlembicConfig
+from src.common import logging_utils
 from src.database import (
     ALEMBIC_INI_PATH,
     ALEMBIC_REVISION_PATH,
@@ -14,22 +14,7 @@ from src.database import (
     DB_USER,
 )
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-# Create console handler
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-
-# Create formatter
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-
-# Add formatter to console handler
-console_handler.setFormatter(formatter)
-
-# Add console handler to logger
-logger.addHandler(console_handler)
+logger = logging_utils.create_logger(__name__)
 
 
 def wait_for_postgres():

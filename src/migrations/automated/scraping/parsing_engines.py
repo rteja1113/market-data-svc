@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import abc
 import datetime
-import logging
 
 import bs4
 
+from src.common import logging_utils
 from src.common.constants import MARKET_TZ, NUM_TIME_STEPS_IN_HOUR
 from src.marketdata.schemas import (
     BasePointInTimePriceData,
@@ -13,7 +13,7 @@ from src.marketdata.schemas import (
     RTMPointInTimePriceData,
 )
 
-logger = logging.getLogger(__name__)
+logger = logging_utils.create_logger(__name__)
 
 
 class BaseHtmlParsingEngine(abc.ABC):
