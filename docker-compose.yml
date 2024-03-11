@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: uvicorn src.main:app
+    volumes:
+    - .:/app
+    ports:
+    - "8000:8000"
+    depends_on:
+    - db
+    environment:
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: market_data_db
+      ALEMBIC_INI_PATH: alembic.ini
+      ALEMBIC_REVISION_PATH: alembic/versions
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+    - "5432:5432"
