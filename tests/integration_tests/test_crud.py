@@ -36,6 +36,11 @@ def test_inserting_records(session, pyd_price_model, price_type):
 )
 def test_getting_records(session, pyd_price_model, price_type):
     market_type_enum = Markets[price_type]
+
+    # insert the record
+    row_inserting_fn = MARKET_TO_DB_INSERTING_FN_MAP.get(market_type_enum)
+    _ = row_inserting_fn(session, pyd_price_model)
+
     row_getting_fn = MARKET_TO_DB_GETTING_FN_MAP.get(market_type_enum)
     time_frame = TimeFrame(
         start_datetime=datetime.datetime(2000, 1, 1),
@@ -43,6 +48,7 @@ def test_getting_records(session, pyd_price_model, price_type):
     )
     db_models = row_getting_fn(session, time_frame)
 
+    assert len(db_models) == 1
     # check instance type
     for db_model in db_models:
         assert isinstance(db_model, MARKETTYPE_TO_ORM_MAP.get(market_type_enum))
