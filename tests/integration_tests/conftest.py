@@ -2,6 +2,7 @@ import datetime
 import os.path
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import create_database, database_exists, drop_database
@@ -97,3 +98,16 @@ def pyd_price_model(request, mock_datetime, mock_prices):
         w3_price_in_rs_per_mwh=mock_prices[12],
         mcp_price_in_rs_per_mwh=mock_prices[13],
     )
+
+
+@pytest.fixture(scope="session")
+def test_app():
+    # we only want to use test plugins so unregister everybody else
+    from src.main import app
+
+    yield app
+
+
+@pytest.fixture(scope="function")
+def client(test_app, session):
+    yield TestClient(test_app)
