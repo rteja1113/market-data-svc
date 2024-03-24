@@ -1,7 +1,6 @@
-import logging
-
 import sqlalchemy
 
+from src.common import logging_utils
 from src.common.enums import Markets
 from src.common.models import TimeFrame
 from src.database import Session
@@ -16,24 +15,7 @@ from src.marketdata.schemas import (
     RTMPointInTimePriceData,
 )
 
-logger = logging.getLogger(__name__)
-
-logger.setLevel(logging.DEBUG)
-
-# Create console handler
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-
-# Create formatter
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-
-# Add formatter to console handler
-console_handler.setFormatter(formatter)
-
-# Add console handler to logger
-logger.addHandler(console_handler)
+logger = logging_utils.create_logger(__name__)
 
 
 def _create_price_record(

@@ -1,10 +1,10 @@
 import datetime
-import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from src.common import logging_utils
 from src.common.constants import MARKET_TZ
 from src.common.models import TimeFrame
 from src.common.utils import convert_naive_datetime_in_utc_to_ist
@@ -12,23 +12,7 @@ from src.database import Session  # noqa
 from src.marketdata.crud import get_dam_price_records, get_rtm_price_records
 from src.marketdata.schemas import DAMPointInTimePriceData, RTMPointInTimePriceData
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
-# Create console handler
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
-
-# Create formatter
-formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-
-# Add formatter to console handler
-console_handler.setFormatter(formatter)
-
-# Add console handler to logger
-logger.addHandler(console_handler)
+logger = logging_utils.create_logger(__name__)
 
 # Create a FastAPI app
 router = APIRouter(prefix="/marketdata")

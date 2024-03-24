@@ -1,10 +1,10 @@
 import datetime
 import json
-import logging
 
 import click
 from dateutil import parser
 
+from src.common import logging_utils
 from src.common.constants import MARKET_TZ
 from src.common.enums import Markets
 from src.database import Session
@@ -16,7 +16,7 @@ from src.marketdata.schemas import (
 
 session = Session()
 
-logger = logging.getLogger(__name__)
+logger = logging_utils.create_logger(__name__)
 
 
 def _load_price_data_from_json(json_path: str) -> list[dict]:
