@@ -2,7 +2,6 @@ import datetime
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.orm import Session
 
 from src.common import logging_utils
 from src.common.constants import MARKET_TZ
@@ -18,12 +17,12 @@ logger = logging_utils.create_logger(__name__)
 router = APIRouter(prefix="/marketdata")
 
 
-def get_db():
-    db = Session()
+def get_db_session():
+    db_session = Session()
     try:
-        yield db
+        yield db_session
     finally:
-        db.close()
+        db_session.close()
 
 
 def _convert_string_to_datetime(datetime_string: str) -> datetime.datetime:
@@ -49,7 +48,7 @@ def _validate_and_convert_datetime_params(
 def read_dam_price_records(
     start_datetime_str: Annotated[str, Query(alias="start_datetime")],
     end_datetime_str: Annotated[str, Query(alias="end_datetime")],
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db_session)],
 ) -> list[DAMPointInTimePriceData]:
     """
     Fetches the DAM price records for the given time frame
@@ -92,7 +91,7 @@ def read_dam_price_records(
 def read_rtm_price_records(
     start_datetime_str: Annotated[str, Query(alias="start_datetime")],
     end_datetime_str: Annotated[str, Query(alias="end_datetime")],
-    db: Session = Depends(get_db),
+    db: Annotated[Session, Depends(get_db_session)],
 ) -> list[RTMPointInTimePriceData]:
     """
     Fetches the RTM price records for the given time frame
