@@ -16,7 +16,10 @@ from src.migrations.manual.manual_data_migration import export_json_price_data_i
 def test_export_json_price_data_into_db(monkeypatch, session, json_path, price_type):
     monkeypatch.setattr("src.migrations.manual.manual_data_migration.session", session)
     runner = CliRunner()
-    _ = runner.invoke(export_json_price_data_into_db, [json_path, price_type])
+    _ = runner.invoke(
+        export_json_price_data_into_db,
+        ["--json_path", json_path, "--price_type", price_type],
+    )
     market_type_enum = Markets[price_type]
 
     # check that the record was inserted into the migrations
