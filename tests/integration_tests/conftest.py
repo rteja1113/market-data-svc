@@ -4,7 +4,7 @@ import os.path
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists, drop_database
 from starlette.config import environ
 
@@ -61,11 +61,17 @@ def Session(engine):
 
 
 @pytest.fixture(scope="function")
-def session(Session):
-    session = Session()
-    yield session
-    session.rollback()
-    session.close()
+def session(engine):
+    connection = engine.connect()
+    transaction = connection.begin()
+    session_factory = sessionmaker(bind=connection)
+    session = scoped_session(session_factory)
+
+    yield session  # Use the session in the test
+
+    session.remove()
+    transaction.rollback()  # Roll back changes after each test
+    connection.close()
 
 
 @pytest.fixture
