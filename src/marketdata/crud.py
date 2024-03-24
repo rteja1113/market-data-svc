@@ -93,7 +93,9 @@ def get_rtm_price_records(
     return _get_price_records(db_session, time_frame, RTMPointInTimePriceDataDb)
 
 
-MARKET_TO_DB_INSERTING_FN_MAP = {
+MARKET_TO_DB_INSERTING_FN_MAP: dict[
+    Markets, typing.Callable[[Session, TimeFrame], BasePointInTimePriceDataDb]
+] = {
     Markets.DAM: create_dam_price_record,
     Markets.RTM: create_rtm_price_record,
 }
