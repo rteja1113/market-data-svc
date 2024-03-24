@@ -95,3 +95,8 @@ MARKET_TO_DB_INSERTING_FN_MAP = {
     Markets.DAM: create_dam_price_record,
     Markets.RTM: create_rtm_price_record,
 }
+
+# MARKET_TO_DB_GETTING_FN_MAP = {
+#     Markets.DAM: get_dam_price_records,
+#     Markets.RTM: get_rtm_price_records,
+# }
