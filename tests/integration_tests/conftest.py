@@ -23,6 +23,7 @@ environ["ALEMBIC_REVISION_PATH"] = os.path.join(os.getcwd(), "alembic")  # noqa
 environ["ALEMBIC_INI_PATH"] = os.path.join(os.getcwd(), "alembic.ini")  # noqa
 
 from src.database import SQLALCHEMY_DATABASE_URI  # noqa
+from src.marketdata.router import get_db_session  # noqa
 
 
 @pytest.fixture(scope="session")
@@ -116,4 +117,7 @@ def test_app():
 
 @pytest.fixture(scope="function")
 def client(test_app, session):
-    yield TestClient(test_app)
+    test_app.dependency_overrides[get_db_session] = session
+    test_client = TestClient(test_app)
+    yield test_client
+    test_app.dependency_overrides.clear()
