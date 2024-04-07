@@ -6,8 +6,8 @@ from fastapi import HTTPException
 from src.common.constants import MARKET_TZ
 from src.common.models import TimeFrame
 from src.marketdata.router_utils import (
-    _convert_datetime_query_params_to_time_frame,
     _convert_string_to_datetime,
+    convert_datetime_query_params_to_time_frame,
 )
 
 
@@ -25,7 +25,7 @@ def test__validate_and_convert_datetime_params_with_valid_input():
         end_datetime=MARKET_TZ.localize(datetime(2022, 1, 2, 0, 0, 0)),
     )
     assert (
-        _convert_datetime_query_params_to_time_frame(
+        convert_datetime_query_params_to_time_frame(
             start_datetime_str, end_datetime_str
         )
         == expected_time_frame
@@ -36,6 +36,6 @@ def test__validate_and_convert_datetime_params_with_invalid_dates():
     start_datetime_str = "2022-01-02 00:00:00"
     end_datetime_str = "2022-01-01 00:00:00"
     with pytest.raises(HTTPException):
-        _convert_datetime_query_params_to_time_frame(
+        convert_datetime_query_params_to_time_frame(
             start_datetime_str, end_datetime_str
         )

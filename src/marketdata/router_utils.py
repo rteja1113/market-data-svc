@@ -10,7 +10,7 @@ def _convert_string_to_datetime(datetime_string: str) -> datetime.datetime:
     )
 
 
-def _convert_datetime_query_params_to_time_frame(
+def convert_datetime_query_params_to_time_frame(
     start_datetime_str: str, end_datetime_str: str
 ) -> TimeFrame:
     start_datetime = _convert_string_to_datetime(start_datetime_str)
