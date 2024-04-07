@@ -59,7 +59,7 @@ def read_dam_price_records(
             settlement_period_start_datetime=convert_timestamp_to_indian_datetime(
                 price_record.settlement_period_start_timestamp
             ),
-            **price_record.dict(),
+            **price_record.__dict__,
         )
         for price_record in price_records
     ]
@@ -100,7 +100,7 @@ def read_rtm_price_records(
             settlement_period_start_datetime=convert_timestamp_to_indian_datetime(
                 price_record.settlement_period_start_timestamp
             ),
-            **price_record.dict(),
+            **price_record.__dict__,
         )
         for price_record in price_records
     ]
