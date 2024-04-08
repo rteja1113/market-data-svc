@@ -53,16 +53,23 @@ def read_dam_price_records(
             status_code=StarletteStatus.HTTP_400_BAD_REQUEST,
             detail="Invalid datetime format",
         )
-    price_records = get_dam_price_records(db_session, time_frame)
-    return [
-        DAMPointInTimePriceData(
-            settlement_period_start_datetime=convert_timestamp_to_indian_datetime(
-                price_record.settlement_period_start_timestamp
-            ),
-            **price_record.__dict__,
+    try:
+        price_records = get_dam_price_records(db_session, time_frame)
+        return [
+            DAMPointInTimePriceData(
+                settlement_period_start_datetime=convert_timestamp_to_indian_datetime(
+                    price_record.settlement_period_start_timestamp
+                ),
+                **price_record.__dict__,
+            )
+            for price_record in price_records
+        ]
+    except Exception as e:
+        logger.error(f"Error while fetching DAM price records: {e}")
+        raise fastapi.HTTPException(
+            status_code=StarletteStatus.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error while fetching DAM price records",
         )
-        for price_record in price_records
-    ]
 
 
 @router.get("/rtm")
@@ -94,13 +101,20 @@ def read_rtm_price_records(
             detail="Invalid datetime format",
         )
 
-    price_records = get_rtm_price_records(db_session, time_frame)
-    return [
-        RTMPointInTimePriceData(
-            settlement_period_start_datetime=convert_timestamp_to_indian_datetime(
-                price_record.settlement_period_start_timestamp
-            ),
-            **price_record.__dict__,
+    try:
+        price_records = get_rtm_price_records(db_session, time_frame)
+        return [
+            RTMPointInTimePriceData(
+                settlement_period_start_datetime=convert_timestamp_to_indian_datetime(
+                    price_record.settlement_period_start_timestamp
+                ),
+                **price_record.__dict__,
+            )
+            for price_record in price_records
+        ]
+    except Exception as e:
+        logger.error(f"Error while fetching RTM price records: {e}")
+        raise fastapi.HTTPException(
+            status_code=StarletteStatus.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error while fetching RTM price records",
         )
-        for price_record in price_records
-    ]
