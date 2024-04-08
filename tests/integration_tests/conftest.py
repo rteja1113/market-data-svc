@@ -109,7 +109,6 @@ def pyd_price_model(request, mock_datetime, mock_prices):
 
 @pytest.fixture(scope="session")
 def test_app():
-    # we only want to use test plugins so unregister everybody else
     from src.main import app
 
     yield app
@@ -117,7 +116,7 @@ def test_app():
 
 @pytest.fixture(scope="function")
 def client(test_app, session):
-    test_app.dependency_overrides[get_db_session] = session
+    test_app.dependency_overrides[get_db_session] = lambda: session
     test_client = TestClient(test_app)
     yield test_client
     test_app.dependency_overrides.clear()
