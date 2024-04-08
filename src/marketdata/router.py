@@ -25,23 +25,28 @@ def get_db_session():
         db_session.close()
 
 
+StartTimeQueryParameter = Annotated[
+    str,
+    Query(
+        alias="start_datetime",
+        description="Start datetime in ISO format(Ex: 2021-01-01 00:00:00)",
+    ),
+]
+EndTimeQueryParameter = Annotated[
+    str,
+    Query(
+        alias="end_datetime",
+        description="end datetime in ISO format(Ex: 2021-01-01 00:00:00)",
+    ),
+]
+DbDepends = Annotated[Session, Depends(get_db_session)]
+
+
 @router.get("/dam")
 def read_dam_price_records(
-    start_datetime_str: Annotated[
-        str,
-        Query(
-            alias="start_datetime",
-            description="Start datetime in ISO format(Ex: 2021-01-01 00:00:00)",
-        ),
-    ],
-    end_datetime_str: Annotated[
-        str,
-        Query(
-            alias="end_datetime",
-            description="end datetime in ISO format(Ex: 2021-01-01 00:00:00)",
-        ),
-    ],
-    db_session: Annotated[Session, Depends(get_db_session)],
+    start_datetime_str: StartTimeQueryParameter,
+    end_datetime_str: EndTimeQueryParameter,
+    db_session: DbDepends,
 ) -> list[DAMPointInTimePriceData]:
     try:
         time_frame = convert_datetime_query_params_to_time_frame(
@@ -74,21 +79,9 @@ def read_dam_price_records(
 
 @router.get("/rtm")
 def read_rtm_price_records(
-    start_datetime_str: Annotated[
-        str,
-        Query(
-            alias="start_datetime",
-            description="Start datetime in ISO format(Ex: 2021-01-01 00:00:00)",
-        ),
-    ],
-    end_datetime_str: Annotated[
-        str,
-        Query(
-            alias="end_datetime",
-            description="end datetime in ISO format(Ex: 2021-01-01 00:00:00)",
-        ),
-    ],
-    db_session: Annotated[Session, Depends(get_db_session)],
+    start_datetime_str: StartTimeQueryParameter,
+    end_datetime_str: EndTimeQueryParameter,
+    db_session: DbDepends,
 ) -> list[RTMPointInTimePriceData]:
     try:
         time_frame = convert_datetime_query_params_to_time_frame(
