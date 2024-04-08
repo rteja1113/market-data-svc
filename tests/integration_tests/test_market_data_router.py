@@ -17,11 +17,12 @@ def insert_row(session, pyd_price_model, price_type):
     indirect=["pyd_price_model"],
 )
 def test_read_price_records_valid_requests(
-    client, session, pyd_price_model, price_type, insert_row
+    mock_datetime, client, session, pyd_price_model, price_type, insert_row
 ):
+    mock_datetime_str = mock_datetime.strftime("%Y-%m-%d %H:%M:%S")
     response = client.get(
         f"/marketdata/{price_type.lower()}?"
-        f"start_datetime=2000-01-01 00:00:00&end_datetime=2050-01-01 01:00:00"
+        f"start_datetime={mock_datetime_str}&end_datetime={mock_datetime_str}"
     )
     assert response.status_code == 200
     expected_response = pyd_price_model.model_dump()
@@ -35,10 +36,11 @@ def test_read_price_records_valid_requests(
     indirect=["pyd_price_model"],
 )
 def test_read_price_records_invalid_requests(
-    client, session, pyd_price_model, price_type, insert_row
+    mock_datetime, client, session, pyd_price_model, price_type, insert_row
 ):
+    mock_datetime_str = mock_datetime.strftime("%Y-%m-%dT%H:%M:%S")
     response = client.get(
         f"/marketdata/{price_type.lower()}?"
-        f"start_datetime=2000-01-01T00:00:00&end_datetime=2050-01-01T01:00:00"
+        f"start_datetime={mock_datetime_str}&end_datetime={mock_datetime_str}"
     )
     assert response.status_code == 400
