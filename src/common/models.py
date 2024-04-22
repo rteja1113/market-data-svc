@@ -3,9 +3,6 @@ from __future__ import annotations
 import datetime
 
 from pydantic import BaseModel, model_validator
-from pydantic.functional_validators import field_validator
-
-from src.common.constants import MARKET_TZ
 
 
 class TimeFrame(BaseModel):
