@@ -5,10 +5,11 @@ from fastapi import APIRouter, Depends, Query
 from starlette import status as StarletteStatus
 
 from src.common import logging_utils
+from src.common.models import TimeFrame
 from src.common.utils import convert_timestamp_to_indian_datetime
 from src.database import Session  # noqa
 from src.marketdata.crud import get_dam_price_records, get_rtm_price_records
-from src.marketdata.router_utils import convert_datetime_query_params_to_time_frame
+from src.marketdata.router_utils import _convert_string_to_datetime
 from src.marketdata.schemas import DAMPointInTimePriceData, RTMPointInTimePriceData
 
 logger = logging_utils.create_logger(__name__)
@@ -42,22 +43,26 @@ EndTimeQueryParameter = Annotated[
 DbDepends = Annotated[Session, Depends(get_db_session)]
 
 
-@router.get("/dam")
-def read_dam_price_records(
-    start_datetime_str: StartTimeQueryParameter,
-    end_datetime_str: EndTimeQueryParameter,
-    db_session: DbDepends,
-) -> list[DAMPointInTimePriceData]:
+def parse_timeframe(
+    start_datetime_str: StartTimeQueryParameter, end_datetime_str: EndTimeQueryParameter
+) -> TimeFrame:
     try:
-        time_frame = convert_datetime_query_params_to_time_frame(
-            start_datetime_str, end_datetime_str
-        )
+        start_datetime = _convert_string_to_datetime(start_datetime_str)
+        end_datetime = _convert_string_to_datetime(end_datetime_str)
+        return TimeFrame(start_datetime=start_datetime, end_datetime=end_datetime)
     except ValueError as e:
         logger.error(f"Error while converting datetime query params: {e}")
         raise fastapi.HTTPException(
             status_code=StarletteStatus.HTTP_400_BAD_REQUEST,
             detail="Invalid datetime format",
         )
+
+
+@router.get("/dam")
+def read_dam_price_records(
+    time_frame: Annotated[TimeFrame, Depends(parse_timeframe)],
+    db_session: DbDepends,
+) -> list[DAMPointInTimePriceData]:
     try:
         price_records = get_dam_price_records(db_session, time_frame)
         return [
@@ -79,21 +84,9 @@ def read_dam_price_records(
 
 @router.get("/rtm")
 def read_rtm_price_records(
-    start_datetime_str: StartTimeQueryParameter,
-    end_datetime_str: EndTimeQueryParameter,
+    time_frame: Annotated[TimeFrame, Depends(parse_timeframe)],
     db_session: DbDepends,
 ) -> list[RTMPointInTimePriceData]:
-    try:
-        time_frame = convert_datetime_query_params_to_time_frame(
-            start_datetime_str, end_datetime_str
-        )
-    except ValueError as e:
-        logger.error(f"Error while converting datetime query params: {e}")
-        raise fastapi.HTTPException(
-            status_code=StarletteStatus.HTTP_400_BAD_REQUEST,
-            detail="Invalid datetime format",
-        )
-
     try:
         price_records = get_rtm_price_records(db_session, time_frame)
         return [
