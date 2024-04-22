@@ -22,13 +22,6 @@ class TimeFrame(BaseModel):
         if self.start_datetime > self.end_datetime:
             raise ValueError("start_datetime should be less than end_datetime")
 
-    @field_validator("start_datetime", "end_datetime", mode="before")
-    def convert_to_ist(cls, value):
-        if isinstance(value, str):
-            return MARKET_TZ.localize(
-                datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-            )
-
 
 if __name__ == "__main__":
     download_window = TimeFrame(
