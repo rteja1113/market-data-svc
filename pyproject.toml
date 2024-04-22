@@ -18,10 +18,10 @@ openpyxl = "^3.1.2"
 mypy = "^1.8.0"
 types-pytz = "^2023.3.1.1"
 alembic = "^1.13.1"
-psycopg2 = "^2.9.9"
 click = "^8.1.7"
 sqlalchemy-utils = "^0.41.1"
 uvicorn = "^0.27.1"
+psycopg2-binary = "^2.9.9"
 
 
 [tool.poetry.group.dev.dependencies]
