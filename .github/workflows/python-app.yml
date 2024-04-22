@@ -56,6 +56,12 @@ jobs:
 
     - name: Run tests
       run: poetry run pytest --cov=./
+      env:
+        DB_USER: test_user
+        DB_PASSWORD: test_password
+        DB_HOST: localhost
+        DB_PORT: 5432
+        DB_NAME: test_iex_db
 
     - name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v1
