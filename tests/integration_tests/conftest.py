@@ -2,8 +2,9 @@ import datetime
 import os.path
 
 import pytest
+from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy_utils import create_database, database_exists, drop_database
 from starlette.config import environ
 
@@ -13,15 +14,12 @@ from src.common.constants import MARKET_TZ
 from src.common.enums import Markets
 from src.marketdata.schemas import MARKETTYPE_TO_PRICE_PYD_MODEL_MAP
 
-environ["DB_USER"] = "test_user"  # noqa
-environ["DB_PASSWORD"] = "test_password"  # noqa
-environ["DB_HOST"] = "localhost"  # noqa
-environ["DB_PORT"] = "5432"  # noqa
 environ["DB_NAME"] = "test_iex_db"  # noqa
 environ["ALEMBIC_REVISION_PATH"] = os.path.join(os.getcwd(), "alembic")  # noqa
 environ["ALEMBIC_INI_PATH"] = os.path.join(os.getcwd(), "alembic.ini")  # noqa
 
 from src.database import SQLALCHEMY_DATABASE_URI  # noqa
+from src.marketdata.router import get_db_session  # noqa
 
 
 @pytest.fixture(scope="session")
@@ -60,11 +58,17 @@ def Session(engine):
 
 
 @pytest.fixture(scope="function")
-def session(Session):
-    session = Session()
-    yield session
-    session.rollback()
-    session.close()
+def session(engine):
+    connection = engine.connect()
+    transaction = connection.begin()
+    session_factory = sessionmaker(bind=connection)
+    session = scoped_session(session_factory)
+
+    yield session  # Use the session in the test
+
+    session.remove()
+    transaction.rollback()  # Roll back changes after each test
+    connection.close()
 
 
 @pytest.fixture
@@ -97,3 +101,18 @@ def pyd_price_model(request, mock_datetime, mock_prices):
         w3_price_in_rs_per_mwh=mock_prices[12],
         mcp_price_in_rs_per_mwh=mock_prices[13],
     )
+
+
+@pytest.fixture(scope="session")
+def test_app():
+    from src.main import app
+
+    yield app
+
+
+@pytest.fixture(scope="function")
+def client(test_app, session):
+    test_app.dependency_overrides[get_db_session] = lambda: session
+    test_client = TestClient(test_app)
+    yield test_client
+    test_app.dependency_overrides.clear()

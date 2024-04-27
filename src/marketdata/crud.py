@@ -1,3 +1,5 @@
+import typing
+
 import sqlalchemy
 
 from src.common import logging_utils
@@ -91,7 +93,16 @@ def get_rtm_price_records(
     return _get_price_records(db_session, time_frame, RTMPointInTimePriceDataDb)
 
 
-MARKET_TO_DB_INSERTING_FN_MAP = {
+MARKET_TO_DB_INSERTING_FN_MAP: dict[
+    Markets, typing.Callable[[Session, TimeFrame], BasePointInTimePriceDataDb]
+] = {
     Markets.DAM: create_dam_price_record,
     Markets.RTM: create_rtm_price_record,
+}
+
+MARKET_TO_DB_GETTING_FN_MAP: dict[
+    Markets, typing.Callable[[Session, TimeFrame], list[BasePointInTimePriceDataDb]]
+] = {
+    Markets.DAM: get_dam_price_records,
+    Markets.RTM: get_rtm_price_records,
 }

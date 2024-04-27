@@ -23,6 +23,6 @@ class TimeFrame(BaseModel):
 if __name__ == "__main__":
     download_window = TimeFrame(
         start_datetime=datetime.datetime(2020, 1, 1),
-        end_datetime=datetime.datetime(2019, 1, 1),
+        end_datetime=datetime.datetime(2020, 1, 2),
     )
     print(download_window)

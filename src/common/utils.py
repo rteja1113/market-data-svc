@@ -5,13 +5,11 @@ import pytz
 from src.common.constants import MARKET_TZ
 
 
-def convert_naive_datetime_in_utc_to_ist(
-    utc_time: datetime.datetime,
+def convert_timestamp_to_indian_datetime(
+    unix_timestamp: int,
 ) -> datetime.datetime:
     """
     Converts the given naive datetime object in UTC to Indian Standard Time
     """
-    if utc_time.tzinfo is not None:
-        raise ValueError("The given datetime object should not have a timezone")
-
+    utc_time = datetime.datetime.utcfromtimestamp(unix_timestamp)
     return utc_time.replace(tzinfo=pytz.utc).astimezone(MARKET_TZ)
