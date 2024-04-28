@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
-    command: bash -c "alembic upgrade head && uvicorn src.main:app"
+    command: bash -c "alembic upgrade head && uvicorn src.main:app --host 0.0.0.0 --port 8000"
     volumes:
     - .:/app
     ports:
@@ -18,11 +18,24 @@ services:
       DB_NAME: market_data_db
       ALEMBIC_INI_PATH: alembic.ini
       ALEMBIC_REVISION_PATH: alembic/versions
+    networks:
+    - backend
   db:
     image: postgres:latest
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: market_data_db
+    volumes:
+    - postgres_data:/var/lib/postgresql/data
+    networks:
+    - backend
     ports:
     - "5432:5432"
+
+
+volumes:
+  postgres_data:
+
+networks:
+  backend:
