@@ -3,7 +3,7 @@ version: '3.8'
 services:
   web:
     build: .
-    command: uvicorn src.main:app
+    command: bash -c "alembic upgrade head && uvicorn src.main:app"
     volumes:
     - .:/app
     ports:
@@ -23,5 +23,6 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: market_data_db
     ports:
     - "5432:5432"
