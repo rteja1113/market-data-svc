@@ -51,6 +51,33 @@ def _create_price_record(
     return pit_record
 
 
+def _create_multiple_price_records(
+    db_session: Session,
+    pit_data_list: list[BasePointInTimePriceData],
+    db_price_model: sqlalchemy.orm.decl_api.DeclarativeMeta,
+) -> list[BasePointInTimePriceDataDb]:
+    pyd_model_dumps = []
+
+    for pit_data in pit_data_list:
+        settlement_period_start_timestamp = (
+            pit_data.settlement_period_start_datetime.timestamp()
+        )
+        pyd_dump = pit_data.model_dump()
+        pyd_dump[
+            "settlement_period_start_timestamp"
+        ] = settlement_period_start_timestamp
+        pyd_dump.pop("settlement_period_start_datetime")
+        pyd_model_dumps.append(pyd_dump)
+    pit_records = [
+        db_price_model(**pyd_model_dump) for pyd_model_dump in pyd_model_dumps
+    ]
+    db_session.add_all(pit_records)
+    db_session.commit()
+    for record in pit_records:
+        db_session.refresh(record)
+    return pit_records
+
+
 def create_dam_price_record(
     db_session: Session, dam_pit_data: DAMPointInTimePriceData
 ) -> DAMPointInTimePriceDataDb:
@@ -61,6 +88,22 @@ def create_rtm_price_record(
     db_session: Session, rtm_pit_data: RTMPointInTimePriceData
 ) -> RTMPointInTimePriceDataDb:
     return _create_price_record(db_session, rtm_pit_data, RTMPointInTimePriceDataDb)
+
+
+def create_multiple_dam_price_records(
+    db_session: Session, dam_pit_data_list: list[DAMPointInTimePriceData]
+) -> list[DAMPointInTimePriceDataDb]:
+    return _create_multiple_price_records(
+        db_session, dam_pit_data_list, DAMPointInTimePriceDataDb
+    )
+
+
+def create_multiple_rtm_price_records(
+    db_session: Session, rtm_pit_data_list: list[RTMPointInTimePriceData]
+) -> list[RTMPointInTimePriceDataDb]:
+    return _create_multiple_price_records(
+        db_session, rtm_pit_data_list, RTMPointInTimePriceDataDb
+    )
 
 
 def _get_price_records(
@@ -94,11 +137,23 @@ def get_rtm_price_records(
 
 
 MARKET_TO_DB_INSERTING_FN_MAP: dict[
-    Markets, typing.Callable[[Session, TimeFrame], BasePointInTimePriceDataDb]
+    Markets,
+    typing.Callable[[Session, BasePointInTimePriceData], BasePointInTimePriceDataDb],
 ] = {
     Markets.DAM: create_dam_price_record,
     Markets.RTM: create_rtm_price_record,
 }
+
+MARKET_TO_DB_MULTIPLE_INSERTING_FN_MAP: dict[
+    Markets,
+    typing.Callable[
+        [Session, list[BasePointInTimePriceData]], list[BasePointInTimePriceDataDb]
+    ],
+] = {
+    Markets.DAM: create_multiple_dam_price_records,
+    Markets.RTM: create_multiple_rtm_price_records,
+}
+
 
 MARKET_TO_DB_GETTING_FN_MAP: dict[
     Markets, typing.Callable[[Session, TimeFrame], list[BasePointInTimePriceDataDb]]
