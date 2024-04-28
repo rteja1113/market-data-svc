@@ -8,7 +8,7 @@ from src.common import logging_utils
 from src.common.constants import MARKET_TZ
 from src.common.enums import Markets
 from src.database import Session
-from src.marketdata.crud import MARKET_TO_DB_INSERTING_FN_MAP
+from src.marketdata.crud import MARKET_TO_DB_MULTIPLE_INSERTING_FN_MAP
 from src.marketdata.schemas import (
     MARKETTYPE_TO_PRICE_PYD_MODEL_MAP,
     BasePointInTimePriceData,
@@ -70,16 +70,11 @@ def export_json_price_data_into_db(json_path: str, price_type: str) -> None:
         price_pit_rows = _load_price_data_from_json(json_path)
         price_enum = Markets[price_type]
         pit_pyd_models = _convert_dict_to_pyd(price_pit_rows, price_enum)
-        row_inserting_fn = MARKET_TO_DB_INSERTING_FN_MAP.get(price_enum)
-        if row_inserting_fn is None:
+        multi_row_inserting_fn = MARKET_TO_DB_MULTIPLE_INSERTING_FN_MAP.get(price_enum)
+        if multi_row_inserting_fn is None:
             raise ValueError(f"Invalid price type: {price_type}")
         try:
-            for pit_pyd_model in pit_pyd_models:
-                _ = row_inserting_fn(session, pit_pyd_model)
-                logger.info(
-                    f"{price_type} price Record created"
-                    f" for {pit_pyd_model.settlement_period_start_datetime}"
-                )
+            _ = multi_row_inserting_fn(session, pit_pyd_models)
         except Exception as e:
             logger.exception(f"Error occurred while exporting data into db. Error: {e}")
         finally:
