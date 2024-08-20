@@ -1,16 +1,16 @@
-# [WIP] IEX-APP
+# Market-Data-Service
 # TODO
 - [X] Add pre-commit hooks
-- [ ] Descriptive README
-- [ ] Add tests
-- [ ] Add CI/CD
-- [ ] Add Dockerfile
-- [ ] Build DB and ORM
-- [ ] Add API
+- [X] Descriptive README
+- [X] Add tests
+- [X] Add CI/CD
+- [X] Add Dockerfile
+- [X] Build DB and ORM
+- [X] Add API
 
 
 ## Description
-This is a Python application that provides an API for Indian Energy Exchange Data. It uses web scraping techniques to gather data and pandas for data manipulation.
+This is a FastAPI application that provides an API for Indian Energy Exchange Data. It scrapes the IEX website for prices and exposes them via APIs.
 
 
 ## Pre-commit Hooks
@@ -28,7 +28,7 @@ This project uses pre-commit hooks to ensure code quality and consistency. The h
 3. Install the pre-commit hooks: `pre-commit install`
 
 ## Usage
-Provide instructions on how to use your application.
+Run the dockerfile using `docker build .`
 
 ## Contributing
 Provide instructions on how to contribute to your project.
