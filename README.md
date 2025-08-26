@@ -1,4 +1,5 @@
 # Market-Data-Service
+A fun side project I worked on. It scrapes IEX(Indian Energy Exchange) website for DAM(day ahead market) and RTM(real time market) electricity prices and offers APIs for retrieving those prices.
 # TODO
 - [X] Add pre-commit hooks
 - [X] Descriptive README
