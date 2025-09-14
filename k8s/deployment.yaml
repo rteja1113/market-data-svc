@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: market-data-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: market-data-app
+  template:
+    metadata:
+      labels:
+        app: market-data-app
+    spec:
+      containers:
+      - name: market-data-web
+        image: 458421339500.dkr.ecr.ap-south-1.amazonaws.com/iex-app:latest
+        ports:
+        - containerPort: 8000
+        command: ["uvicorn"]
+        args: ["src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+        env:
+        - name: DB_HOST
+          value: "market-data-db.cb2km040y25t.us-east-1.rds.amazonaws.com"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_NAME
+          value: "market_data_db"
+        - name: DB_USER
+          value: "postgres"
+        - name: DB_PASSWORD
+          value: "RaviTeja_93"
+        - name: ALEMBIC_REVISION_PATH
+          value: "alembic"
